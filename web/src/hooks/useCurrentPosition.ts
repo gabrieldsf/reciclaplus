@@ -9,13 +9,29 @@ type State = { position: DevicePosition | null; locating: boolean; error: string
 const errorMessages: Record<number, string> = {
   1: 'Permissão de localização negada. Libere o acesso no ícone de cadeado da barra de endereço e tente de novo.',
   2: 'Não foi possível obter sua localização. Verifique se a localização está ativada no aparelho (no Windows: Configurações › Privacidade e segurança › Localização).',
-  3: 'A localização demorou demais para responder. Tente de novo ou marque o local no mapa.',
+  3: 'Seu aparelho não respondeu com a localização. Marque o local tocando no mapa. (No Windows, verifique se o "Serviço de Geolocalização" está ativo.)',
 }
 
+// Alguns navegadores nunca chamam o callback quando o serviço de localização do
+// sistema está desligado; este limite garante que a tela não fica presa "obtendo"
+const HARD_LIMIT_MS = 15_000
+const TIMEOUT = 3
+
 function getPosition(options: PositionOptions) {
-  return new Promise<GeolocationPosition>((resolve, reject) =>
-    navigator.geolocation.getCurrentPosition(resolve, reject, options),
-  )
+  return new Promise<GeolocationPosition>((resolve, reject) => {
+    const guard = setTimeout(() => reject({ code: TIMEOUT }), (options.timeout ?? 0) + 1_000)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        clearTimeout(guard)
+        resolve(position)
+      },
+      (err) => {
+        clearTimeout(guard)
+        reject(err)
+      },
+      options,
+    )
+  })
 }
 
 // Tenta GPS (alta precisão) e, se falhar, cai para a localização por Wi-Fi/rede,
@@ -23,10 +39,15 @@ function getPosition(options: PositionOptions) {
 async function readDevicePosition(): Promise<DevicePosition> {
   let result: GeolocationPosition
   try {
-    result = await getPosition({ enableHighAccuracy: true, timeout: 8_000, maximumAge: 30_000 })
+    result = await getPosition({ enableHighAccuracy: true, timeout: 6_000, maximumAge: 30_000 })
   } catch (err) {
     if ((err as GeolocationPositionError).code === 1) throw err
-    result = await getPosition({ enableHighAccuracy: false, timeout: 15_000, maximumAge: 300_000 })
+    const remaining = HARD_LIMIT_MS - 7_000
+    result = await getPosition({
+      enableHighAccuracy: false,
+      timeout: remaining,
+      maximumAge: 300_000,
+    })
   }
   const { latitude, longitude, accuracy } = result.coords
   return { latitude, longitude, accuracy }
