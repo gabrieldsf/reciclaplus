@@ -11,6 +11,18 @@ export type Category = {
 
 export type OccurrenceStatus = 'AVAILABLE' | 'IN_COLLECTION' | 'COLLECTED' | 'CANCELLED'
 
+type PublicUser = { id: string; name: string; userType: 'PERSON' | 'COMPANY' | 'ADMIN' }
+
+export type Collection = {
+  id: string
+  acceptedAt: string
+  completedAt: string | null
+  cancelledAt: string | null
+  collectedQuantity: string | null
+  observation: string | null
+  collector: PublicUser
+}
+
 export type Occurrence = {
   id: string
   description: string | null
@@ -23,7 +35,9 @@ export type Occurrence = {
   updatedAt: string
   category: { id: number; name: string }
   subcategory: { id: number; name: string } | null
-  user: { id: string; name: string; userType: 'PERSON' | 'COMPANY' | 'ADMIN' }
+  user: PublicUser
+  // Coleta mais recente (em andamento, concluída ou cancelada), se houver
+  collection: Collection | null
 }
 
 export type LatLng = { latitude: number; longitude: number }

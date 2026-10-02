@@ -91,6 +91,8 @@ model Collection {
   collectedQuantity String?   @map("collected_quantity")
   acceptedAt        DateTime  @default(now()) @map("accepted_at")
   completedAt       DateTime? @map("completed_at")
+  // Preenchido quando o dono cancela a ocorrência durante a coleta
+  cancelledAt       DateTime? @map("cancelled_at")
   observation       String?
 
   occurrence Occurrence @relation(fields: [occurrenceId], references: [id])

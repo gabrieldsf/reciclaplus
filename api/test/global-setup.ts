@@ -52,6 +52,15 @@ export default async function setup(project: TestProject) {
   project.provide('databaseUrl', databaseUrl)
 
   return async () => {
+    // Conexões esquecidas abertas fazem o Postgres esperar para desligar
+    // (e o processo ficava órfão); encerra todas antes de parar o servidor
+    const client = pg.getPgClient()
+    await client.connect()
+    await client.query(
+      'SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid()',
+    )
+    await client.end()
+
     await pg.stop()
     rmSync(databaseDir, { recursive: true, force: true })
   }

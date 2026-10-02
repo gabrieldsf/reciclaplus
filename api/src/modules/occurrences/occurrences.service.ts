@@ -22,7 +22,28 @@ export const occurrenceSelect = {
   category: { select: { id: true, name: true } },
   subcategory: { select: { id: true, name: true } },
   user: { select: { id: true, name: true, userType: true } },
+  // Coleta mais recente (em andamento, concluída ou cancelada junto com a ocorrência)
+  collections: {
+    orderBy: { acceptedAt: 'desc' },
+    take: 1,
+    select: {
+      id: true,
+      acceptedAt: true,
+      completedAt: true,
+      cancelledAt: true,
+      collectedQuantity: true,
+      observation: true,
+      collector: { select: { id: true, name: true, userType: true } },
+    },
+  },
 } satisfies Prisma.OccurrenceSelect
+
+type SelectedOccurrence = Prisma.OccurrenceGetPayload<{ select: typeof occurrenceSelect }>
+
+// Formato devolvido pela API: a coleta mais recente vira `collection` (ou null)
+export function toOccurrenceResponse({ collections, ...occurrence }: SelectedOccurrence) {
+  return { ...occurrence, collection: collections[0] ?? null }
+}
 
 const MAX_LIST_RESULTS = 500
 
@@ -60,14 +81,15 @@ export async function createOccurrence(userId: string, input: CreateOccurrenceIn
   await assertValidCategory(input.categoryId, input.subcategoryId)
 
   // RN01 (usuário autenticado) e RN03 (status inicial AVAILABLE, padrão do banco)
-  return prisma.occurrence.create({
+  const occurrence = await prisma.occurrence.create({
     data: { ...input, userId },
     select: occurrenceSelect,
   })
+  return toOccurrenceResponse(occurrence)
 }
 
 export async function listOccurrences(query: ListOccurrencesQuery) {
-  return prisma.occurrence.findMany({
+  const occurrences = await prisma.occurrence.findMany({
     where: {
       status: { in: query.status },
       ...(query.categoryId && { categoryId: { in: query.categoryId } }),
@@ -76,12 +98,13 @@ export async function listOccurrences(query: ListOccurrencesQuery) {
     take: MAX_LIST_RESULTS,
     select: occurrenceSelect,
   })
+  return occurrences.map(toOccurrenceResponse)
 }
 
 export async function getOccurrence(id: string) {
   const occurrence = await prisma.occurrence.findUnique({ where: { id }, select: occurrenceSelect })
   if (!occurrence) throw new AppError(404, 'Ocorrência não encontrada')
-  return occurrence
+  return toOccurrenceResponse(occurrence)
 }
 
 const EDIT_CONFLICT = 'Somente ocorrências disponíveis podem ser editadas'
@@ -119,10 +142,21 @@ export async function updateOccurrence(id: string, userId: string, input: Update
 }
 
 export async function cancelOccurrence(id: string, userId: string) {
-  // AVAILABLE → CANCELLED e IN_COLLECTION → CANCELLED (seção 9)
-  const { count } = await prisma.occurrence.updateMany({
-    where: { id, userId, status: { in: statusesThatCanReach('CANCELLED') } },
-    data: { status: 'CANCELLED' },
+  const count = await prisma.$transaction(async (tx) => {
+    // AVAILABLE → CANCELLED e IN_COLLECTION → CANCELLED (seção 9)
+    const { count } = await tx.occurrence.updateMany({
+      where: { id, userId, status: { in: statusesThatCanReach('CANCELLED') } },
+      data: { status: 'CANCELLED' },
+    })
+    // Decisão do projeto: a coleta em andamento fica registrada como cancelada
+    // e o coletor não pode mais finalizá-la
+    if (count > 0) {
+      await tx.collection.updateMany({
+        where: { occurrenceId: id, completedAt: null, cancelledAt: null },
+        data: { cancelledAt: new Date() },
+      })
+    }
+    return count
   })
   if (count === 0) {
     await explainRejectedChange(id, userId, 'Esta ocorrência não pode mais ser cancelada')

@@ -1,0 +1,164 @@
+import { useState } from 'react'
+import type { FormEvent, ReactNode } from 'react'
+import { Link, useLocation } from 'react-router'
+import type { User } from '../../auth/AuthContext'
+import { api, ApiError } from '../../lib/api'
+import { formatDateTime } from '../../lib/format'
+import type { Occurrence } from '../../lib/types'
+import { TextField } from '../TextField'
+
+type CollectionPanelProps = {
+  occurrence: Occurrence
+  user: User | null
+  onChange: (occurrence: Occurrence) => void
+}
+
+const primaryButton =
+  'w-full rounded-xl bg-brand-700 px-6 py-3 font-semibold text-white hover:bg-brand-900 disabled:opacity-60'
+
+// Ações e situação da coleta, conforme o status da ocorrência e quem está vendo
+export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelProps) {
+  const location = useLocation()
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const { status, collection } = occurrence
+  const isOwner = user?.id === occurrence.user.id
+  const isCollector = Boolean(user && collection?.collector.id === user.id)
+  const collectorName = isCollector ? 'você' : collection?.collector.name
+
+  async function run(path: string, body?: object) {
+    setError('')
+    setBusy(true)
+    try {
+      const res = await api<{ occurrence: Occurrence }>(`/occurrences/${occurrence.id}/${path}`, {
+        method: 'POST',
+        body,
+      })
+      onChange(res.occurrence)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Erro inesperado')
+      // A ocorrência pode ter mudado (ex.: outra pessoa assumiu antes): recarrega
+      if (err instanceof ApiError && err.status === 409) {
+        api<{ occurrence: Occurrence }>(`/occurrences/${occurrence.id}`)
+          .then((res) => onChange(res.occurrence))
+          .catch(() => {})
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function handleClaim() {
+    if (!window.confirm('Assumir esta coleta? Ela deixará de aparecer para outras pessoas.')) return
+    void run('claim')
+  }
+
+  function handleComplete(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = new FormData(event.currentTarget)
+    void run('complete', {
+      collectedQuantity: String(form.get('collectedQuantity') ?? ''),
+      observation: String(form.get('observation') ?? ''),
+    })
+  }
+
+  let content: ReactNode = null
+
+  if (status === 'AVAILABLE') {
+    if (isOwner) {
+      content = <Note>Aguardando alguém assumir a coleta.</Note>
+    } else if (user) {
+      content = (
+        <button type="button" onClick={handleClaim} disabled={busy} className={primaryButton}>
+          {busy ? 'Assumindo…' : 'Tenho interesse em coletar'}
+        </button>
+      )
+    } else {
+      content = (
+        <Link
+          to="/entrar"
+          state={{ from: location.pathname }}
+          className={`${primaryButton} block text-center`}
+        >
+          Entrar para coletar
+        </Link>
+      )
+    }
+  }
+
+  if (status === 'IN_COLLECTION' && collection) {
+    content = (
+      <div className="flex flex-col gap-4">
+        <Note tone="amber">
+          Coleta assumida por <strong>{collectorName}</strong> em{' '}
+          {formatDateTime(collection.acceptedAt)}.
+        </Note>
+        {isCollector && (
+          <form onSubmit={handleComplete} className="flex flex-col gap-3" noValidate>
+            <h3 className="font-semibold">Finalizar coleta</h3>
+            <TextField
+              label="Quantidade coletada"
+              name="collectedQuantity"
+              maxLength={50}
+              defaultValue={occurrence.estimatedQuantity ?? ''}
+            />
+            <TextField label="Observação" name="observation" maxLength={500} />
+            <button type="submit" disabled={busy} className={primaryButton}>
+              {busy ? 'Confirmando…' : 'Confirmar coleta'}
+            </button>
+          </form>
+        )}
+      </div>
+    )
+  }
+
+  if (status === 'COLLECTED' && collection?.completedAt) {
+    content = (
+      <Note tone="blue">
+        Coletado por <strong>{collectorName}</strong> em {formatDateTime(collection.completedAt)}.
+        {collection.collectedQuantity && <> Quantidade: {collection.collectedQuantity}.</>}
+        {collection.observation && <span className="mt-1 block">“{collection.observation}”</span>}
+      </Note>
+    )
+  }
+
+  if (status === 'CANCELLED' && collection?.cancelledAt) {
+    content = (
+      <Note tone="stone">
+        Ocorrência cancelada por quem a registrou durante a coleta de{' '}
+        <strong>{collectorName}</strong>.
+      </Note>
+    )
+  }
+
+  if (!content && !error) return null
+
+  return (
+    <section aria-label="Coleta" className="flex flex-col gap-3 border-t border-brand-100 pt-4">
+      {content}
+      {error && (
+        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+    </section>
+  )
+}
+
+const noteTones = {
+  green: 'bg-green-50 text-green-900',
+  amber: 'bg-amber-50 text-amber-900',
+  blue: 'bg-blue-50 text-blue-900',
+  stone: 'bg-stone-100 text-stone-800',
+}
+
+function Note({
+  children,
+  tone = 'green',
+}: {
+  children: ReactNode
+  tone?: keyof typeof noteTones
+}) {
+  return <p className={`rounded-lg px-3 py-2 text-sm ${noteTones[tone]}`}>{children}</p>
+}

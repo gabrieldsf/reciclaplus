@@ -4,6 +4,7 @@ import { Marker } from 'react-leaflet'
 import { useAuth } from '../auth/AuthContext'
 import { BaseMap } from '../components/map/BaseMap'
 import { categoryIcon } from '../components/map/markers'
+import { CollectionPanel } from '../components/occurrences/CollectionPanel'
 import { StatusBadge } from '../components/occurrences/StatusBadge'
 import { PageHeader } from '../components/PageHeader'
 import { useCurrentPosition } from '../hooks/useCurrentPosition'
@@ -28,7 +29,11 @@ export function OccurrenceDetailPage() {
   const justCreated = (location.state as { created?: boolean } | null)?.created
 
   async function handleCancel() {
-    if (!window.confirm('Cancelar esta ocorrência? Ela deixará de aparecer no mapa.')) return
+    const collector = occurrence?.status === 'IN_COLLECTION' && occurrence.collection?.collector
+    const message = collector
+      ? `Cancelar esta ocorrência? ${collector.name} já assumiu a coleta e não poderá mais finalizá-la.`
+      : 'Cancelar esta ocorrência? Ela deixará de aparecer no mapa.'
+    if (!window.confirm(message)) return
     setActionError('')
     setCancelling(true)
     try {
@@ -162,6 +167,8 @@ export function OccurrenceDetailPage() {
               <p className="whitespace-pre-line">{occurrence.description}</p>
             </div>
           )}
+
+          <CollectionPanel occurrence={occurrence} user={user} onChange={replace} />
 
           {actionError && (
             <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">

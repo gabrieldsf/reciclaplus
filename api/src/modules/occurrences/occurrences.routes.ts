@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { AppError } from '../../lib/errors.js'
 import { requireAuth } from '../../middlewares/require-auth.js'
+import { completeCollectionSchema } from '../collections/collections.schemas.js'
+import * as collectionsService from '../collections/collections.service.js'
 import {
   createOccurrenceSchema,
   listOccurrencesQuerySchema,
@@ -42,4 +44,18 @@ occurrencesRouter.patch('/:id', requireAuth, async (req, res) => {
 occurrencesRouter.post('/:id/cancel', requireAuth, async (req, res) => {
   const id = parseId(req.params.id)
   res.json({ occurrence: await occurrencesService.cancelOccurrence(id, req.userId!) })
+})
+
+// Coletas
+occurrencesRouter.post('/:id/claim', requireAuth, async (req, res) => {
+  const id = parseId(req.params.id)
+  res.json({ occurrence: await collectionsService.claimOccurrence(id, req.userId!) })
+})
+
+occurrencesRouter.post('/:id/complete', requireAuth, async (req, res) => {
+  const id = parseId(req.params.id)
+  const input = completeCollectionSchema.parse(req.body ?? {})
+  res.json({
+    occurrence: await collectionsService.completeCollection(id, req.userId!, input),
+  })
 })
