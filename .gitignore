@@ -1,0 +1,23 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+# Segredos — nunca versionar
+.env
+.env.*
+!.env.example
+
+# Cliente Prisma gerado
+api/src/generated/
+
+# Editor / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Cypress
+cypress/videos/
+cypress/screenshots/

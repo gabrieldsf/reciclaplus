@@ -1,0 +1,23 @@
+{
+  "name": "reciclaplus",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Recicla+ — plataforma web mobile-first para identificação e coleta de materiais recicláveis (TCC)",
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w @reciclaplus/api",
+    "dev:web": "npm run dev -w @reciclaplus/web",
+    "build": "npm run build -w @reciclaplus/api && npm run build -w @reciclaplus/web",
+    "lint": "npm run lint --workspaces",
+    "test": "npm run test -w @reciclaplus/api",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "postinstall": "npm run db:generate -w @reciclaplus/api"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.0"
+  }
+}

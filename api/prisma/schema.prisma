@@ -1,0 +1,102 @@
+// Modelo de dados do Recicla+ (Plano de Projeto, seção 8)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserType {
+  PERSON
+  COMPANY
+  ADMIN
+}
+
+// Máquina de estados (seção 9): AVAILABLE → IN_COLLECTION → COLLECTED; AVAILABLE/IN_COLLECTION → CANCELLED
+enum OccurrenceStatus {
+  AVAILABLE
+  IN_COLLECTION
+  COLLECTED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  userType     UserType @default(PERSON) @map("user_type")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  occurrences Occurrence[]
+  collections Collection[]
+
+  @@map("users")
+}
+
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  subcategories Subcategory[]
+  occurrences   Occurrence[]
+
+  @@map("categories")
+}
+
+model Subcategory {
+  id         Int    @id @default(autoincrement())
+  categoryId Int    @map("category_id")
+  name       String
+
+  category    Category     @relation(fields: [categoryId], references: [id])
+  occurrences Occurrence[]
+
+  @@unique([categoryId, name])
+  @@map("subcategories")
+}
+
+model Occurrence {
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @map("user_id") @db.Uuid
+  categoryId        Int              @map("category_id")
+  subcategoryId     Int?             @map("subcategory_id")
+  description       String?
+  estimatedQuantity String?          @map("estimated_quantity")
+  latitude          Float
+  longitude         Float
+  photoUrl          String?          @map("photo_url")
+  status            OccurrenceStatus @default(AVAILABLE)
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  user        User         @relation(fields: [userId], references: [id])
+  category    Category     @relation(fields: [categoryId], references: [id])
+  subcategory Subcategory? @relation(fields: [subcategoryId], references: [id])
+  collections Collection[]
+
+  @@index([status, categoryId])
+  @@map("occurrences")
+}
+
+model Collection {
+  id                String    @id @default(uuid()) @db.Uuid
+  occurrenceId      String    @map("occurrence_id") @db.Uuid
+  collectorId       String    @map("collector_id") @db.Uuid
+  collectedQuantity String?   @map("collected_quantity")
+  acceptedAt        DateTime  @default(now()) @map("accepted_at")
+  completedAt       DateTime? @map("completed_at")
+  observation       String?
+
+  occurrence Occurrence @relation(fields: [occurrenceId], references: [id])
+  collector  User       @relation(fields: [collectorId], references: [id])
+
+  @@index([occurrenceId])
+  @@index([collectorId])
+  @@map("collections")
+}
