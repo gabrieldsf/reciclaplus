@@ -39,6 +39,8 @@ recicláveis. Projeto de TCC: a especificação completa está no "Plano Complet
 - `src/modules/<feature>/`: `*.routes.ts` (HTTP), `*.schemas.ts` (Zod), `*.service.ts` (regras + Prisma)
 - Erros de negócio: `throw new AppError(status, mensagem)`; Zod e AppError viram JSON no `errorHandler`
 - Rotas protegidas: middleware `requireAuth` → `req.userId`
+- Mudanças de status usam `updateMany` condicional (`where: { id, status: ... }`) e checam `count`;
+  transições válidas ficam em `modules/occurrences/occurrence-status.ts`
 
 ## Convenções
 

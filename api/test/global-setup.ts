@@ -45,10 +45,9 @@ export default async function setup(project: TestProject) {
   await pg.createDatabase(DB_NAME)
 
   const databaseUrl = `postgresql://postgres:postgres@localhost:${port}/${DB_NAME}`
-  execSync('npx prisma migrate deploy', {
-    env: { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl },
-    stdio: 'ignore',
-  })
+  const env = { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl }
+  execSync('npx prisma migrate deploy', { env, stdio: 'ignore' })
+  execSync('npx prisma db seed', { env, stdio: 'ignore' })
 
   project.provide('databaseUrl', databaseUrl)
 
