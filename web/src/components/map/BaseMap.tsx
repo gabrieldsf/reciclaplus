@@ -2,7 +2,7 @@ import 'leaflet/dist/leaflet.css'
 import type { ReactNode } from 'react'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import type { MapContainerProps } from 'react-leaflet'
-import { DEFAULT_CENTER } from '../../lib/geo'
+import { initialMapCenter } from '../../lib/geo'
 import type { LatLng } from '../../lib/types'
 
 type BaseMapProps = Omit<MapContainerProps, 'center'> & {
@@ -14,7 +14,7 @@ type BaseMapProps = Omit<MapContainerProps, 'center'> & {
 // Mapa Leaflet com base do OpenStreetMap. `isolate` impede que as camadas do
 // Leaflet (z-index alto) fiquem por cima do cabeçalho e da navegação.
 export function BaseMap({
-  center = DEFAULT_CENTER,
+  center = initialMapCenter(),
   className = '',
   children,
   ...props

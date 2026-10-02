@@ -1,7 +1,40 @@
 import type { LatLng } from './types'
 
-// Centro padrão do mapa quando não há localização do usuário (São Paulo)
+// Centro usado só na primeira visita, antes de qualquer localização conhecida (São Paulo)
 export const DEFAULT_CENTER: LatLng = { latitude: -23.5505, longitude: -46.6333 }
+
+const LAST_LOCATION_KEY = 'reciclaplus:last-location'
+
+// Última localização conhecida do usuário, para o mapa já abrir perto dele
+export function getLastLocation(): LatLng | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LAST_LOCATION_KEY) ?? 'null')
+    if (typeof saved?.latitude === 'number' && typeof saved?.longitude === 'number') {
+      return { latitude: saved.latitude, longitude: saved.longitude }
+    }
+  } catch {
+    // armazenamento indisponível ou valor corrompido
+  }
+  return null
+}
+
+export function saveLastLocation({ latitude, longitude }: LatLng) {
+  try {
+    localStorage.setItem(LAST_LOCATION_KEY, JSON.stringify({ latitude, longitude }))
+  } catch {
+    // armazenamento indisponível: apenas não lembra a posição
+  }
+}
+
+export function initialMapCenter() {
+  return getLastLocation() ?? DEFAULT_CENTER
+}
+
+export function formatAccuracy(meters: number) {
+  return meters < 1000
+    ? `${Math.round(meters)} m`
+    : `${(meters / 1000).toFixed(1).replace('.', ',')} km`
+}
 
 const EARTH_RADIUS_KM = 6371
 

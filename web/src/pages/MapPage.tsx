@@ -4,14 +4,16 @@ import { Link } from 'react-router'
 import { Marker, Popup, useMap } from 'react-leaflet'
 import { BaseMap } from '../components/map/BaseMap'
 import { categoryIcon } from '../components/map/markers'
+import { moveMapTo } from '../components/map/moveMapTo'
 import { UserLocationMarker } from '../components/map/UserLocationMarker'
 import { CategoryFilter } from '../components/occurrences/CategoryFilter'
 import { useCategories } from '../hooks/useCategories'
 import { useCurrentPosition } from '../hooks/useCurrentPosition'
+import type { DevicePosition } from '../hooks/useCurrentPosition'
 import { api } from '../lib/api'
 import { categoryStyle } from '../lib/categories'
 import { formatDateTime } from '../lib/format'
-import { distanceKm, formatDistance } from '../lib/geo'
+import { distanceKm, formatDistance, getLastLocation } from '../lib/geo'
 import type { LatLng, Occurrence } from '../lib/types'
 
 // Na primeira carga, enquadra todas as ocorrências visíveis
@@ -29,10 +31,11 @@ function FitToOccurrences({ occurrences }: { occurrences: Occurrence[] }) {
   return null
 }
 
-function FlyTo({ position }: { position: LatLng | null }) {
+function FlyTo({ position }: { position: DevicePosition | null }) {
   const map = useMap()
   useEffect(() => {
-    if (position) map.flyTo([position.latitude, position.longitude], 15)
+    // Posição muito imprecisa (ex.: localização por rede): zoom mais aberto
+    if (position) moveMapTo(map, position, position.accuracy > 1000 ? 13 : 15)
   }, [map, position])
   return null
 }
@@ -44,6 +47,10 @@ export function MapPage() {
   const [loadError, setLoadError] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const { position, locating, error: locationError, locate } = useCurrentPosition({ auto: true })
+  // Com uma posição salva o mapa já abre perto do usuário; sem ela, enquadra as ocorrências
+  const [hadSavedLocation] = useState(() => getLastLocation() !== null)
+  // Erro de localização só é exibido se o usuário pediu explicitamente (botão 📍)
+  const [locationRequested, setLocationRequested] = useState(false)
 
   // Começa com todas as categorias marcadas
   const selectedIds = selected ?? new Set(categories.map((c) => c.id))
@@ -68,7 +75,7 @@ export function MapPage() {
   }, [categories.length, selectedKey, allSelected])
 
   const occurrences = selectedKey === '' ? [] : fetched
-  const error = categoriesError || loadError
+  const error = categoriesError || loadError || (locationRequested ? locationError : '')
   const filter = (
     <CategoryFilter categories={categories} selected={selectedIds} onChange={setSelected} />
   )
@@ -81,7 +88,7 @@ export function MapPage() {
 
       <section className="relative flex-1" aria-label="Mapa de ocorrências">
         <BaseMap className="absolute inset-0">
-          <FitToOccurrences occurrences={occurrences} />
+          {!hadSavedLocation && !position && <FitToOccurrences occurrences={occurrences} />}
           <FlyTo position={position} />
           {position && <UserLocationMarker position={position} />}
           {occurrences.map((occurrence) => (
@@ -106,12 +113,12 @@ export function MapPage() {
           </p>
         </div>
 
-        {(error || locationError) && (
+        {error && (
           <p
             role="alert"
             className="absolute inset-x-3 top-14 z-[1000] rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 shadow"
           >
-            {error || locationError}
+            {error}
           </p>
         )}
 
@@ -125,7 +132,10 @@ export function MapPage() {
           </button>
           <button
             type="button"
-            onClick={() => void locate()}
+            onClick={() => {
+              setLocationRequested(true)
+              void locate()
+            }}
             disabled={locating}
             aria-label="Centralizar na minha localização"
             title="Minha localização"

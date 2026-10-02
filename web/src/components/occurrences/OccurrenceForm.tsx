@@ -169,6 +169,8 @@ export function OccurrenceForm({
             value={values.location}
             onChange={(location) => update({ location })}
             invalid={Boolean(fieldErrors['location'])}
+            // Nova ocorrência: já começa na localização atual do aparelho
+            autoLocate={initialValues.location === null}
           />
         </div>
         {fieldErrors['location'] && (
