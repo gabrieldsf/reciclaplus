@@ -6,6 +6,7 @@ import { BaseMap } from '../components/map/BaseMap'
 import { categoryIcon } from '../components/map/markers'
 import { CollectionPanel } from '../components/occurrences/CollectionPanel'
 import { StatusBadge } from '../components/occurrences/StatusBadge'
+import { Timeline } from '../components/occurrences/Timeline'
 import { PageHeader } from '../components/PageHeader'
 import { useCurrentPosition } from '../hooks/useCurrentPosition'
 import { useOccurrence } from '../hooks/useOccurrence'
@@ -169,6 +170,8 @@ export function OccurrenceDetailPage() {
           )}
 
           <CollectionPanel occurrence={occurrence} user={user} onChange={replace} />
+
+          <Timeline occurrence={occurrence} viewerId={user?.id} />
 
           {actionError && (
             <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">

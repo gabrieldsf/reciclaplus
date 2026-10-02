@@ -53,6 +53,8 @@ o descartam ao final. Eles nunca acessam o banco da Neon.
 | POST   | `/api/occurrences/:id/cancel`   | JWT  | Cancela (só o dono)                    |
 | POST   | `/api/occurrences/:id/claim`    | JWT  | Assume a coleta (não pode ser o dono)  |
 | POST   | `/api/occurrences/:id/complete` | JWT  | Finaliza a coleta (só quem assumiu)    |
+| GET    | `/api/me/occurrences`           | JWT  | Histórico: ocorrências que registrei   |
+| GET    | `/api/me/collections`           | JWT  | Histórico: coletas que assumi          |
 
 Rotas protegidas exigem o cabeçalho `Authorization: Bearer <token>`.
 

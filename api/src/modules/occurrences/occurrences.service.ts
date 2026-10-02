@@ -9,7 +9,7 @@ import type {
 } from './occurrences.schemas.js'
 
 // Dados públicos da ocorrência (sem e-mail de quem registrou)
-export const occurrenceSelect = {
+export const occurrenceBaseSelect = {
   id: true,
   description: true,
   estimatedQuantity: true,
@@ -22,6 +22,10 @@ export const occurrenceSelect = {
   category: { select: { id: true, name: true } },
   subcategory: { select: { id: true, name: true } },
   user: { select: { id: true, name: true, userType: true } },
+} satisfies Prisma.OccurrenceSelect
+
+export const occurrenceSelect = {
+  ...occurrenceBaseSelect,
   // Coleta mais recente (em andamento, concluída ou cancelada junto com a ocorrência)
   collections: {
     orderBy: { acceptedAt: 'desc' },

@@ -40,6 +40,11 @@ export type Occurrence = {
   collection: Collection | null
 }
 
+// Item de GET /api/me/collections: a coleta com um resumo da ocorrência
+export type MyCollection = Omit<Collection, 'collector'> & {
+  occurrence: Omit<Occurrence, 'collection'>
+}
+
 export type LatLng = { latitude: number; longitude: number }
 
 export type OccurrenceInput = {
