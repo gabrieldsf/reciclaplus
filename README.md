@@ -29,7 +29,21 @@ npm run dev:web   # http://localhost:5173
 
 | Comando          | O que faz                           |
 | ---------------- | ----------------------------------- |
-| `npm test`       | Testes da API (Vitest + Supertest)  |
+| `npm test`       | Testes da API (Vitest + Supertest)¹ |
 | `npm run lint`   | Lint (oxlint) em todos os pacotes   |
 | `npm run format` | Formata o código com Prettier       |
 | `npm run build`  | Build de produção da API e do front |
+
+¹ Os testes sobem um PostgreSQL temporário e local (`embedded-postgres`), aplicam as migrations e
+o descartam ao final. Eles nunca acessam o banco da Neon.
+
+## API
+
+| Método | Rota                 | Auth | Descrição                              |
+| ------ | -------------------- | ---- | -------------------------------------- |
+| GET    | `/api/health`        | —    | Status da API e do banco               |
+| POST   | `/api/auth/register` | —    | Cadastro (pessoa ou empresa) → `token` |
+| POST   | `/api/auth/login`    | —    | Login → `token`                        |
+| GET    | `/api/auth/me`       | JWT  | Usuário autenticado                    |
+
+Rotas protegidas exigem o cabeçalho `Authorization: Bearer <token>`.

@@ -14,7 +14,9 @@ recicláveis. Projeto de TCC: a especificação completa está no "Plano Complet
 
 - `npm install` na raiz (também gera o cliente Prisma)
 - `npm run dev:api` / `npm run dev:web` (o Vite encaminha `/api` para `localhost:3333`)
-- `npm test`, `npm run lint`, `npm run format`
+- `npm test`, `npm run lint`, `npm run format`, `npm run typecheck -w @reciclaplus/api`
+- Testes da API ficam em `api/test/` e rodam num Postgres temporário (`embedded-postgres`,
+  ver `api/test/global-setup.ts`). Use `resetDatabase()` e `registerUser()` de `test/helpers.ts`.
 - Banco: `npm run db:migrate -w @reciclaplus/api`, `npm run db:seed -w @reciclaplus/api`
 
 ## Regras de negócio (validar SEMPRE no backend — RN10)
@@ -31,6 +33,12 @@ recicláveis. Projeto de TCC: a especificação completa está no "Plano Complet
 - Estados: AVAILABLE → IN_COLLECTION → COLLECTED; AVAILABLE/IN_COLLECTION → CANCELLED.
 - Concorrência (CT08): assumir uma ocorrência deve ser uma atualização condicional atômica
   (`updateMany where status = AVAILABLE` dentro de transação), nunca "ler e depois gravar".
+
+## Estrutura da API
+
+- `src/modules/<feature>/`: `*.routes.ts` (HTTP), `*.schemas.ts` (Zod), `*.service.ts` (regras + Prisma)
+- Erros de negócio: `throw new AppError(status, mensagem)`; Zod e AppError viram JSON no `errorHandler`
+- Rotas protegidas: middleware `requireAuth` → `req.userId`
 
 ## Convenções
 
