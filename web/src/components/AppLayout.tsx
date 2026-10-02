@@ -3,17 +3,19 @@ import { useAuth } from '../auth/AuthContext'
 
 const navItems = [
   { to: '/mapa', label: 'Mapa', icon: '🗺️' },
+  { to: '/informar', label: 'Informar', icon: '➕' },
   { to: '/historico', label: 'Histórico', icon: '🕘' },
   { to: '/perfil', label: 'Perfil', icon: '👤' },
 ]
 
 // Mobile: navegação na barra inferior. Desktop: navegação no topo.
+// A página ocupa exatamente a altura da tela; o conteúdo rola dentro do <main>.
 export function AppLayout() {
   const { user } = useAuth()
 
   return (
-    <div className="flex min-h-dvh flex-col bg-brand-50 text-brand-900">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-brand-100 bg-white px-4 py-3 md:px-8">
+    <div className="flex h-dvh flex-col bg-brand-50 text-brand-900">
+      <header className="flex shrink-0 items-center justify-between border-b border-brand-100 bg-white px-4 py-3 md:px-8">
         <Link to="/" className="text-lg font-bold">
           ♻ Recicla+
         </Link>
@@ -40,13 +42,13 @@ export function AppLayout() {
         )}
       </header>
 
-      <main className="flex-1 pb-20 md:pb-0">
+      <main className="min-h-0 flex-1 overflow-y-auto">
         <Outlet />
       </main>
 
       <nav
         aria-label="Navegação principal"
-        className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-3 border-t border-brand-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="grid shrink-0 grid-cols-4 border-t border-brand-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         {navItems.map((item) => (
           <NavLink

@@ -27,12 +27,12 @@ npm run dev:web   # http://localhost:5173
 
 ## Scripts úteis
 
-| Comando          | O que faz                           |
-| ---------------- | ----------------------------------- |
-| `npm test`       | Testes da API (Vitest + Supertest)¹ |
-| `npm run lint`   | Lint (oxlint) em todos os pacotes   |
-| `npm run format` | Formata o código com Prettier       |
-| `npm run build`  | Build de produção da API e do front |
+| Comando          | O que faz                             |
+| ---------------- | ------------------------------------- |
+| `npm test`       | Testes da API (Supertest)¹ e do front |
+| `npm run lint`   | Lint (oxlint) em todos os pacotes     |
+| `npm run format` | Formata o código com Prettier         |
+| `npm run build`  | Build de produção da API e do front   |
 
 ¹ Os testes sobem um PostgreSQL temporário e local (`embedded-postgres`), aplicam as migrations e
 o descartam ao final. Eles nunca acessam o banco da Neon.

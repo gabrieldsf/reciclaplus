@@ -7,3 +7,25 @@
   --color-brand-100: #d8f3dc;
   --color-brand-50: #edf7ef;
 }
+
+/* Marcador do mapa: gota na cor da categoria (definida em --marker-color) */
+.category-marker {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid white;
+  border-radius: 50% 50% 50% 0;
+  background: var(--marker-color);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+  transform: rotate(-45deg);
+}
+
+.category-marker > span {
+  font-size: 17px;
+  transform: rotate(45deg);
+}
+
+.leaflet-container {
+  font-family: inherit;
+}

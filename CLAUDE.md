@@ -31,6 +31,8 @@ recicláveis. Projeto de TCC: a especificação completa está no "Plano Complet
 - RN08 COLLECTED não pode ser assumida novamente.
 - RN09 Usuário não pode assumir a própria ocorrência.
 - Estados: AVAILABLE → IN_COLLECTION → COLLECTED; AVAILABLE/IN_COLLECTION → CANCELLED.
+- Decisão (02/10/2026): se o dono cancelar uma ocorrência IN_COLLECTION, a coleta aberta fica no
+  histórico como cancelada e o coletor não pode mais finalizá-la.
 - Concorrência (CT08): assumir uma ocorrência deve ser uma atualização condicional atômica
   (`updateMany where status = AVAILABLE` dentro de transação), nunca "ler e depois gravar".
 
