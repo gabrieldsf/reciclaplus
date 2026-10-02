@@ -18,6 +18,7 @@ recicláveis. Projeto de TCC: a especificação completa está no "Plano Complet
 - Testes da API ficam em `api/test/` e rodam num Postgres temporário (`embedded-postgres`,
   ver `api/test/global-setup.ts`). Use `resetDatabase()` e `registerUser()` de `test/helpers.ts`.
 - Banco: `npm run db:migrate -w @reciclaplus/api`, `npm run db:seed -w @reciclaplus/api`
+- Prisma 7: `migrate dev` NÃO regenera o cliente; rode `npm run db:generate -w @reciclaplus/api` depois
 
 ## Regras de negócio (validar SEMPRE no backend — RN10)
 
