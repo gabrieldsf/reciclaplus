@@ -1,0 +1,31 @@
+# Blueprint do Render para a API do Recicla+ (Dashboard → New → Blueprint → este repositório)
+services:
+  - type: web
+    name: reciclaplus-api
+    runtime: node
+    plan: free
+    # Mais próximo do banco Neon (sa-east-1) entre as regiões do Render
+    region: virginia
+    # --include=dev: prisma e tsx (dependências de desenvolvimento) são usados no build e no deploy
+    buildCommand: npm ci --include=dev && npm run build -w @reciclaplus/api
+    # Aplica migrations pendentes e garante as categorias (seed idempotente) antes de subir
+    startCommand: >-
+      npm run db:deploy -w @reciclaplus/api &&
+      npm run db:seed -w @reciclaplus/api &&
+      npm start -w @reciclaplus/api
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      # Strings da Neon (Dashboard → Connect): com pooling e direta
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      # Segredo novo, gerado pelo Render (diferente do usado em desenvolvimento)
+      - key: JWT_SECRET
+        generateValue: true
+      # URL do front na Vercel, ex.: https://reciclaplus.vercel.app
+      - key: CORS_ORIGIN
+        sync: false

@@ -86,6 +86,10 @@ instalação; no iPhone, mostra como instalar pelo menu Compartilhar do Safari.
 
 A instalação exige HTTPS (ou `localhost`); no celular, teste pela URL pública do deploy.
 
+## Deploy
+
+Vercel (front) + Render (API) + Neon (banco). Passo a passo em [DEPLOY.md](DEPLOY.md).
+
 ## Testes E2E
 
 Os testes de ponta a ponta (Playwright, desktop + celular) ficam no projeto irmão
