@@ -3,6 +3,8 @@
 Plataforma web responsiva e mobile-first para identificação, disponibilização e coleta de materiais
 recicláveis. Trabalho de Conclusão de Curso.
 
+**Acesse:** https://reciclaplus.vercel.app · API: https://reciclaplus-api.onrender.com/api/health
+
 ## Estrutura
 
 ```

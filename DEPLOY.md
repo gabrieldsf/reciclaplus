@@ -1,5 +1,8 @@
 # Deploy do Recicla+
 
+- **Front (PWA):** https://reciclaplus.vercel.app
+- **API:** https://reciclaplus-api.onrender.com/api/health
+
 ```
 Usuário ──HTTPS──► Vercel (front + PWA) ──/api/*──► Render (API Node) ──► Neon (PostgreSQL)
 ```
