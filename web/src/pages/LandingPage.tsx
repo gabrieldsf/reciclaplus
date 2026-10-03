@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
+import { InstallAppButton } from '../components/InstallAppButton'
 
 export function LandingPage() {
   const { user } = useAuth()
@@ -43,6 +44,7 @@ export function LandingPage() {
               Criar conta
             </Link>
           )}
+          <InstallAppButton />
         </div>
       </main>
     </div>

@@ -77,8 +77,10 @@ dados da API e mapas sempre vêm da rede. Ele não roda no `npm run dev:web` —
 o build de produção:
 
 ```bash
-npm run build -w @reciclaplus/web
-npx -w @reciclaplus/web vite preview   # http://localhost:4173
+npm run preview   # build do front + http://localhost:4173 (rode também npm run dev:api)
 ```
+
+O app mostra um botão **Instalar app** (página inicial e Perfil) quando o navegador permite a
+instalação; no iPhone, mostra como instalar pelo menu Compartilhar do Safari.
 
 A instalação exige HTTPS (ou `localhost`); no celular, teste pela URL pública do deploy.

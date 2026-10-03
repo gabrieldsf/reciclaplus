@@ -10,6 +10,7 @@
   "scripts": {
     "dev:api": "npm run dev -w @reciclaplus/api",
     "dev:web": "npm run dev -w @reciclaplus/web",
+    "preview": "npm run build -w @reciclaplus/web && npm run preview -w @reciclaplus/web",
     "build": "npm run build -w @reciclaplus/api && npm run build -w @reciclaplus/web",
     "lint": "npm run lint --workspaces",
     "test": "npm run test --workspaces",

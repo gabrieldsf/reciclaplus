@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
+import { InstallAppButton } from '../components/InstallAppButton'
 
 const userTypeLabels = { PERSON: 'Pessoa', COMPANY: 'Empresa', ADMIN: 'Administrador' } as const
 
@@ -32,6 +33,7 @@ export function ProfilePage() {
           <dd className="font-medium">{userTypeLabels[user.userType]}</dd>
         </div>
       </dl>
+      <InstallAppButton className="mt-6 w-full" />
       <button
         type="button"
         onClick={handleLogout}
