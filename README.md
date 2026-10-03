@@ -27,12 +27,13 @@ npm run dev:web   # http://localhost:5173
 
 ## Scripts úteis
 
-| Comando          | O que faz                             |
-| ---------------- | ------------------------------------- |
-| `npm test`       | Testes da API (Supertest)¹ e do front |
-| `npm run lint`   | Lint (oxlint) em todos os pacotes     |
-| `npm run format` | Formata o código com Prettier         |
-| `npm run build`  | Build de produção da API e do front   |
+| Comando                             | O que faz                                                 |
+| ----------------------------------- | --------------------------------------------------------- |
+| `npm test`                          | Testes da API (Supertest)¹ e do front                     |
+| `npm run lint`                      | Lint (oxlint) em todos os pacotes                         |
+| `npm run format`                    | Formata o código com Prettier                             |
+| `npm run build`                     | Build de produção da API e do front                       |
+| `npm run icons -w @reciclaplus/web` | Regera os ícones do PWA a partir de `web/public/logo.svg` |
 
 ¹ Os testes sobem um PostgreSQL temporário e local (`embedded-postgres`), aplicam as migrations e
 o descartam ao final. Eles nunca acessam o banco da Neon.
@@ -67,3 +68,17 @@ quantidade coletada, observação) ou `null`.
 Erros seguem o formato `{ "message": "...", "errors"?: [{ "field", "message" }] }`, com status
 400 (validação), 401 (não autenticado), 403 (sem permissão), 404 (não encontrado) e
 409 (status da ocorrência não permite a operação).
+
+## PWA
+
+O front é um PWA enxuto: pode ser adicionado à tela inicial do celular e abre em tela cheia,
+com ícone próprio. O service worker guarda apenas os arquivos do app (HTML, JS, CSS, ícones);
+dados da API e mapas sempre vêm da rede. Ele não roda no `npm run dev:web` — para testar, use
+o build de produção:
+
+```bash
+npm run build -w @reciclaplus/web
+npx -w @reciclaplus/web vite preview   # http://localhost:4173
+```
+
+A instalação exige HTTPS (ou `localhost`); no celular, teste pela URL pública do deploy.

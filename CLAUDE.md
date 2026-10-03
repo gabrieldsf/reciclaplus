@@ -50,6 +50,7 @@ recicláveis. Projeto de TCC: a especificação completa está no "Plano Complet
 - Não criar funcionalidades fora do escopo do MVP sem perguntar; não mudar a arquitetura sem justificar.
 - Código simples, legível e testável. Interface e mensagens em pt-BR; código em inglês.
 - Mobile-first: navegação inferior no celular, lateral/superior no desktop.
+- PWA (vite-plugin-pwa): o service worker só existe no build; não fazer cache de `/api` nem dos tiles do OSM.
 - Nunca versionar segredos (`.env`). Usar `api/.env.example` como referência.
 - Toda regra de negócio relevante tem teste. Feature só está pronta quando validada (Definition of Done).
 - Ao fim de cada alteração: listar arquivos alterados, como testar e possíveis impactos.
