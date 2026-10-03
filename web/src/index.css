@@ -6,6 +6,10 @@
   --color-brand-500: #40916c;
   --color-brand-100: #d8f3dc;
   --color-brand-50: #edf7ef;
+
+  /* Séries dos gráficos (paleta categórica validada: contraste e daltonismo) */
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
 }
 
 /* Marcador do mapa: gota na cor da categoria (definida em --marker-color) */

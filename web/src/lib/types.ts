@@ -45,6 +45,18 @@ export type MyCollection = Omit<Collection, 'collector'> & {
   occurrence: Omit<Occurrence, 'collection'>
 }
 
+// GET /api/stats
+export type CategoryStat = { id: number; name: string; total: number; collected: number }
+export type WeekStat = { weekStart: string; registered: number; collected: number }
+export type PlatformStats = {
+  occurrences: Record<OccurrenceStatus, number> & { total: number }
+  collectionRate: number | null
+  averageHours: { untilClaimed: number | null; untilCollected: number | null }
+  participants: { people: number; companies: number; collectors: number }
+  byCategory: CategoryStat[]
+  weekly: WeekStat[]
+}
+
 export type LatLng = { latitude: number; longitude: number }
 
 export type OccurrenceInput = {

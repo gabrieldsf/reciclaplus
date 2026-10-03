@@ -3,6 +3,7 @@ import { AuthProvider } from './auth/AuthContext'
 import { RequireAuth } from './auth/RequireAuth'
 import { AppLayout } from './components/AppLayout'
 import { CreateOccurrencePage } from './pages/CreateOccurrencePage'
+import { DashboardPage } from './pages/DashboardPage'
 import { EditOccurrencePage } from './pages/EditOccurrencePage'
 import { HistoryPage } from './pages/HistoryPage'
 import { LandingPage } from './pages/LandingPage'
@@ -24,6 +25,7 @@ function App() {
           <Route element={<AppLayout />}>
             {/* O mapa é público; criar ocorrência e coletar exigem login */}
             <Route path="/mapa" element={<MapPage />} />
+            <Route path="/painel" element={<DashboardPage />} />
             <Route path="/ocorrencias/:id" element={<OccurrenceDetailPage />} />
             <Route element={<RequireAuth />}>
               <Route path="/informar" element={<CreateOccurrencePage />} />

@@ -40,22 +40,23 @@ o descartam ao final. Eles nunca acessam o banco da Neon.
 
 ## API
 
-| Método | Rota                            | Auth | Descrição                              |
-| ------ | ------------------------------- | ---- | -------------------------------------- |
-| GET    | `/api/health`                   | —    | Status da API e do banco               |
-| POST   | `/api/auth/register`            | —    | Cadastro (pessoa ou empresa) → `token` |
-| POST   | `/api/auth/login`               | —    | Login → `token`                        |
-| GET    | `/api/auth/me`                  | JWT  | Usuário autenticado                    |
-| GET    | `/api/categories`               | —    | Categorias com subcategorias           |
-| GET    | `/api/occurrences`              | —    | Lista (filtros abaixo)                 |
-| POST   | `/api/occurrences`              | JWT  | Cria ocorrência (status AVAILABLE)     |
-| GET    | `/api/occurrences/:id`          | —    | Detalhes                               |
-| PATCH  | `/api/occurrences/:id`          | JWT  | Edita (só o dono, só se AVAILABLE)     |
-| POST   | `/api/occurrences/:id/cancel`   | JWT  | Cancela (só o dono)                    |
-| POST   | `/api/occurrences/:id/claim`    | JWT  | Assume a coleta (não pode ser o dono)  |
-| POST   | `/api/occurrences/:id/complete` | JWT  | Finaliza a coleta (só quem assumiu)    |
-| GET    | `/api/me/occurrences`           | JWT  | Histórico: ocorrências que registrei   |
-| GET    | `/api/me/collections`           | JWT  | Histórico: coletas que assumi          |
+| Método | Rota                            | Auth | Descrição                                                    |
+| ------ | ------------------------------- | ---- | ------------------------------------------------------------ |
+| GET    | `/api/health`                   | —    | Status da API e do banco                                     |
+| POST   | `/api/auth/register`            | —    | Cadastro (pessoa ou empresa) → `token`                       |
+| POST   | `/api/auth/login`               | —    | Login → `token`                                              |
+| GET    | `/api/auth/me`                  | JWT  | Usuário autenticado                                          |
+| GET    | `/api/categories`               | —    | Categorias com subcategorias                                 |
+| GET    | `/api/occurrences`              | —    | Lista (filtros abaixo)                                       |
+| POST   | `/api/occurrences`              | JWT  | Cria ocorrência (status AVAILABLE)                           |
+| GET    | `/api/occurrences/:id`          | —    | Detalhes                                                     |
+| PATCH  | `/api/occurrences/:id`          | JWT  | Edita (só o dono, só se AVAILABLE)                           |
+| POST   | `/api/occurrences/:id/cancel`   | JWT  | Cancela (só o dono)                                          |
+| POST   | `/api/occurrences/:id/claim`    | JWT  | Assume a coleta (não pode ser o dono)                        |
+| POST   | `/api/occurrences/:id/complete` | JWT  | Finaliza a coleta (só quem assumiu)                          |
+| GET    | `/api/me/occurrences`           | JWT  | Histórico: ocorrências que registrei                         |
+| GET    | `/api/me/collections`           | JWT  | Histórico: coletas que assumi                                |
+| GET    | `/api/stats`                    | —    | Painel público: totais, categorias, tempos médios, 8 semanas |
 
 Rotas protegidas exigem o cabeçalho `Authorization: Bearer <token>`.
 

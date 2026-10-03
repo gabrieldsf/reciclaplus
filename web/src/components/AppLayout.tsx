@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 
 const navItems = [
   { to: '/mapa', label: 'Mapa', icon: '🗺️' },
+  { to: '/painel', label: 'Painel', icon: '📊' },
   { to: '/informar', label: 'Informar', icon: '➕' },
   { to: '/historico', label: 'Histórico', icon: '🕘' },
   { to: '/perfil', label: 'Perfil', icon: '👤' },
@@ -48,7 +49,7 @@ export function AppLayout() {
 
       <nav
         aria-label="Navegação principal"
-        className="grid shrink-0 grid-cols-4 border-t border-brand-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="grid shrink-0 grid-cols-5 border-t border-brand-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         {navItems.map((item) => (
           <NavLink
