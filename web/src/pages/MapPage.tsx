@@ -97,6 +97,10 @@ export function MapPage() {
               position={[occurrence.latitude, occurrence.longitude]}
               icon={categoryIcon(occurrence.category.name)}
               alt={occurrence.category.name}
+              // Nome acessível do marcador (e dica ao passar o mouse): "Plástico · 20 kg"
+              title={[occurrence.category.name, occurrence.estimatedQuantity]
+                .filter(Boolean)
+                .join(' · ')}
             >
               <Popup>
                 <OccurrenceSummary occurrence={occurrence} userPosition={position} />

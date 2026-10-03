@@ -25,6 +25,9 @@ type AuthContextValue = {
   user: User | null
   // true enquanto a sessão salva ainda está sendo validada na API
   loading: boolean
+  // true logo após o usuário clicar em "Sair" (rotas protegidas mandam para o início,
+  // não para o login)
+  loggedOut: boolean
   login: (email: string, password: string) => Promise<void>
   register: (data: RegisterData) => Promise<void>
   logout: () => void
@@ -35,6 +38,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(() => tokenStorage.get() !== null)
+  const [loggedOut, setLoggedOut] = useState(false)
 
   useEffect(() => {
     if (!tokenStorage.get()) return
@@ -50,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const startSession = useCallback(({ user, token }: AuthResponse) => {
     tokenStorage.set(token)
     setUser(user)
+    setLoggedOut(false)
   }, [])
 
   const login = useCallback(
@@ -71,11 +76,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     tokenStorage.clear()
     setUser(null)
+    setLoggedOut(true)
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout],
+    () => ({ user, loading, loggedOut, login, register, logout }),
+    [user, loading, loggedOut, login, register, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Em desenvolvimento (e no preview), /api é encaminhado para o backend local
-const proxy = { '/api': 'http://localhost:3333' }
+// Em desenvolvimento (e no preview), /api é encaminhado para o backend local.
+// API_URL permite apontar para outra API (ex.: a pilha isolada dos testes E2E).
+const proxy = { '/api': process.env['API_URL'] ?? 'http://localhost:3333' }
 
 export default defineConfig({
   plugins: [

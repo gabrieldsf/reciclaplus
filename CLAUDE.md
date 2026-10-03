@@ -7,7 +7,8 @@ recicláveis. Projeto de TCC: a especificação completa está no "Plano Complet
 
 - `web/`: React + TypeScript + Vite, Tailwind CSS v4, Leaflet + OpenStreetMap, PWA (Vite PWA)
 - `api/`: Node.js + TypeScript, Express 5, Prisma 7 (adapter `pg`), PostgreSQL (Neon), JWT, Zod
-- Testes: Vitest + Supertest (API e regras de negócio), Cypress (E2E)
+- Testes: Vitest + Supertest (API e regras de negócio); E2E com **Playwright** no repositório
+  irmão `../reciclaplus-playwright` (decisão: Playwright no lugar do Cypress previsto no PDF)
 - Lint: oxlint · Formatação: Prettier · Monorepo com npm workspaces
 
 ## Comandos

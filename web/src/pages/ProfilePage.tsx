@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
 import { InstallAppButton } from '../components/InstallAppButton'
 
@@ -6,15 +5,9 @@ const userTypeLabels = { PERSON: 'Pessoa', COMPANY: 'Empresa', ADMIN: 'Administr
 
 export function ProfilePage() {
   const { user, logout } = useAuth()
-  const navigate = useNavigate()
 
   // RequireAuth garante que há usuário nesta rota
   if (!user) return null
-
-  function handleLogout() {
-    logout()
-    navigate('/', { replace: true })
-  }
 
   return (
     <section className="mx-auto max-w-md p-4 md:p-8">
@@ -36,7 +29,8 @@ export function ProfilePage() {
       <InstallAppButton className="mt-6 w-full" />
       <button
         type="button"
-        onClick={handleLogout}
+        // RequireAuth leva para a página inicial após sair
+        onClick={logout}
         className="mt-6 w-full rounded-xl border-2 border-red-700 px-6 py-3 font-semibold text-red-700 hover:bg-red-50"
       >
         Sair

@@ -56,7 +56,8 @@ export function AppLayout() {
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 py-2 text-xs font-medium ${isActive ? 'text-brand-700' : 'text-brand-900/60'}`
+              // Ativo: negrito + faixa no topo (não depende só da cor); inativo com contraste AA
+              `flex flex-col items-center gap-0.5 border-t-[3px] py-2 text-xs ${isActive ? 'border-brand-700 font-bold text-brand-900' : 'border-transparent font-medium text-brand-700'}`
             }
           >
             <span aria-hidden="true" className="text-xl">

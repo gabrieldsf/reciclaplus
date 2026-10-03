@@ -85,3 +85,15 @@ O app mostra um botão **Instalar app** (página inicial e Perfil) quando o nave
 instalação; no iPhone, mostra como instalar pelo menu Compartilhar do Safari.
 
 A instalação exige HTTPS (ou `localhost`); no celular, teste pela URL pública do deploy.
+
+## Testes E2E
+
+Os testes de ponta a ponta (Playwright, desktop + celular) ficam no projeto irmão
+[`reciclaplus-playwright`](../reciclaplus-playwright). Eles sobem uma pilha isolada
+(Postgres temporário + API + front) e não tocam o banco da Neon:
+
+```bash
+cd ../reciclaplus-playwright
+npm install && npm run install:browsers
+npm test
+```
