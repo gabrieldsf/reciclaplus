@@ -1,4 +1,5 @@
 import { prisma } from '../../lib/prisma.js'
+import { OPEN_COLLECTION } from '../occurrences/occurrence-status.js'
 import {
   occurrenceBaseSelect,
   occurrenceSelect,
@@ -20,11 +21,12 @@ export async function listMyOccurrences(userId: string) {
   return occurrences.map(toOccurrenceResponse)
 }
 
-// Coletas assumidas pelo usuário (em andamento, concluídas ou canceladas pelo dono).
+// Coletas assumidas pelo usuário (em andamento, concluídas, canceladas pelo dono ou
+// desfeitas: desistência / liberação pelo dono).
 // Com `active`, só as em andamento (usadas pela rota no mapa).
 export async function listMyCollections(userId: string, { active = false } = {}) {
   const collections = await prisma.collection.findMany({
-    where: { collectorId: userId, ...(active && { completedAt: null, cancelledAt: null }) },
+    where: { collectorId: userId, ...(active && OPEN_COLLECTION) },
     orderBy: { acceptedAt: 'desc' },
     take: MAX_HISTORY_RESULTS,
     select: {
@@ -32,6 +34,8 @@ export async function listMyCollections(userId: string, { active = false } = {})
       acceptedAt: true,
       completedAt: true,
       cancelledAt: true,
+      releasedAt: true,
+      releaseReason: true,
       collectedQuantity: true,
       observation: true,
       photoId: true,

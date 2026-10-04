@@ -15,6 +15,9 @@ type CollectionPanelProps = {
   onChange: (occurrence: Occurrence) => void
 }
 
+// Mesmo prazo da API: depois disso o dono pode liberar uma coleta parada
+const RELEASE_AFTER_HOURS = 24
+
 const primaryButton =
   'w-full rounded-xl bg-brand-700 px-6 py-3 font-semibold text-white hover:bg-brand-900 disabled:opacity-60'
 
@@ -26,6 +29,8 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
   // Foto opcional do material coletado (enviada antes de confirmar)
   const [photo, setPhoto] = useState<UploadedPhoto | null>(null)
   const [photoUploading, setPhotoUploading] = useState(false)
+  // Momento em que a tela abriu (para saber se o dono já pode liberar a coleta)
+  const [openedAt] = useState(() => Date.now())
 
   const { status, collection } = occurrence
   const isOwner = user?.id === occurrence.user.id
@@ -69,6 +74,26 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
     })
   }
 
+  function handleGiveUp() {
+    if (
+      !window.confirm(
+        'Desistir desta coleta? Ela volta para o mapa e outras pessoas poderão assumir.',
+      )
+    )
+      return
+    void run('give-up')
+  }
+
+  function handleRelease() {
+    if (
+      !window.confirm(
+        `Liberar a coleta? ${collection?.collector.name} não poderá mais finalizá-la e a ocorrência volta para o mapa.`,
+      )
+    )
+      return
+    void run('release')
+  }
+
   let content: ReactNode = null
 
   if (status === 'AVAILABLE') {
@@ -100,12 +125,35 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
   }
 
   if (status === 'IN_COLLECTION' && collection) {
+    const releasableAt = Date.parse(collection.acceptedAt) + RELEASE_AFTER_HOURS * 3_600_000
     content = (
       <div className="flex flex-col gap-4">
         <Note tone="amber">
           Coleta assumida por <strong>{collectorName}</strong> em{' '}
           {formatDateTime(collection.acceptedAt)}.
         </Note>
+        {isOwner &&
+          (releasableAt <= openedAt ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-brand-700">
+                A coleta está parada há mais de {RELEASE_AFTER_HOURS} h. Se a pessoa não apareceu,
+                você pode liberar para outras pessoas.
+              </p>
+              <button
+                type="button"
+                onClick={handleRelease}
+                disabled={busy}
+                className="rounded-xl border-2 border-brand-700 px-6 py-2.5 font-semibold hover:bg-brand-100 disabled:opacity-60"
+              >
+                {busy ? 'Liberando…' : 'Liberar para outras pessoas'}
+              </button>
+            </div>
+          ) : (
+            <p className="text-sm text-brand-700">
+              Se a pessoa não aparecer, você poderá liberar a coleta para outras pessoas a partir de{' '}
+              {formatDateTime(new Date(releasableAt).toISOString())}.
+            </p>
+          ))}
         {isCollector && (
           <form onSubmit={handleComplete} className="flex flex-col gap-3" noValidate>
             <h3 className="font-semibold">Finalizar coleta</h3>
@@ -126,6 +174,16 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
               {busy ? 'Confirmando…' : 'Confirmar coleta'}
             </button>
           </form>
+        )}
+        {isCollector && (
+          <button
+            type="button"
+            onClick={handleGiveUp}
+            disabled={busy}
+            className="self-center rounded-lg px-3 py-1.5 text-sm font-semibold text-red-700 underline hover:bg-red-50 disabled:opacity-60"
+          >
+            Desistir da coleta
+          </button>
         )}
       </div>
     )

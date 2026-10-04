@@ -20,6 +20,7 @@ function occurrence(overrides: Partial<Occurrence> = {}): Occurrence {
     subcategory: null,
     user: owner,
     collection: null,
+    releasedCollections: [],
     ...overrides,
   }
 }
@@ -63,6 +64,7 @@ describe('buildTimeline', () => {
   it('cancelada sem coleta usa updatedAt como data do cancelamento', () => {
     const o = occurrence({ status: 'CANCELLED', updatedAt: '2026-10-02T09:00:00Z' })
     expect(buildTimeline(o).at(-1)).toEqual({
+      id: 'cancelled',
       key: 'cancelled',
       label: 'Ocorrência cancelada',
       at: '2026-10-02T09:00:00Z',
@@ -84,5 +86,41 @@ describe('buildTimeline', () => {
       'Registrada por Maria',
       'Coleta assumida por você',
     ])
+  })
+
+  it('coletas desfeitas aparecem antes da atual, com o motivo', () => {
+    const other = { id: 'u3', name: 'Ana', userType: 'PERSON' as const, avatarUrl: null }
+    const o = occurrence({
+      status: 'IN_COLLECTION',
+      releasedCollections: [
+        {
+          id: 'c0',
+          acceptedAt: '2026-10-01T10:30:00Z',
+          releasedAt: '2026-10-01T10:45:00Z',
+          releaseReason: 'GAVE_UP',
+          collector: other,
+        },
+        {
+          id: 'c00',
+          acceptedAt: '2026-10-01T10:50:00Z',
+          releasedAt: '2026-10-01T10:55:00Z',
+          releaseReason: 'RELEASED_BY_OWNER',
+          collector,
+        },
+      ],
+      collection: collection({ id: 'c1' }),
+    })
+    const events = buildTimeline(o, 'u1')
+    expect(events.map((e) => e.label)).toEqual([
+      'Registrada por você',
+      'Coleta assumida por Ana',
+      'Ana desistiu da coleta',
+      'Coleta assumida por João',
+      'Coleta liberada por você (o coletor não apareceu)',
+      'Coleta assumida por João',
+    ])
+    // Chaves únicas para a lista do React
+    expect(new Set(events.map((e) => e.id)).size).toBe(events.length)
+    expect(buildTimeline(o, 'u3')[2]?.label).toBe('Você desistiu da coleta')
   })
 })

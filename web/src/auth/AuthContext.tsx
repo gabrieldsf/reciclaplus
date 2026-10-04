@@ -34,6 +34,8 @@ type AuthContextValue = {
   loggedOut: boolean
   login: (email: string, password: string) => Promise<void>
   register: (data: RegisterData) => Promise<void>
+  // "Esqueci minha senha": troca a senha com o código recebido e já entra no app
+  resetPassword: (email: string, code: string, password: string) => Promise<void>
   logout: () => void
   // Atualiza os dados do usuário logado (ex.: depois de trocar o avatar)
   updateUser: (user: User) => void
@@ -79,6 +81,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [startSession],
   )
 
+  const resetPassword = useCallback(
+    async (email: string, code: string, password: string) => {
+      startSession(
+        await api<AuthResponse>('/auth/password/reset', {
+          method: 'POST',
+          body: { email, code, password },
+        }),
+      )
+    },
+    [startSession],
+  )
+
   const logout = useCallback(() => {
     tokenStorage.clear()
     setUser(null)
@@ -86,8 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, loggedOut, login, register, logout, updateUser: setUser }),
-    [user, loading, loggedOut, login, register, logout],
+    () => ({
+      user,
+      loading,
+      loggedOut,
+      login,
+      register,
+      resetPassword,
+      logout,
+      updateUser: setUser,
+    }),
+    [user, loading, loggedOut, login, register, resetPassword, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

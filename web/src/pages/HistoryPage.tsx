@@ -5,7 +5,7 @@ import { OccurrenceThumb } from '../components/occurrences/OccurrenceThumb'
 import { StatusBadge } from '../components/occurrences/StatusBadge'
 import { api } from '../lib/api'
 import { formatDateTime } from '../lib/format'
-import type { MyCollection, Occurrence } from '../lib/types'
+import type { MyCollection, Occurrence, OccurrenceSummary } from '../lib/types'
 
 type Tab = 'ocorrencias' | 'coletas'
 
@@ -115,6 +115,16 @@ const collectionStates = {
   inProgress: { label: 'Em andamento', classes: 'bg-amber-100 text-amber-800' },
   done: { label: 'Concluída', classes: 'bg-blue-100 text-blue-800' },
   cancelled: { label: 'Cancelada pelo dono', classes: 'bg-stone-200 text-stone-700' },
+  gaveUp: { label: 'Você desistiu', classes: 'bg-orange-100 text-orange-800' },
+  released: { label: 'Liberada pelo dono', classes: 'bg-orange-100 text-orange-800' },
+}
+
+function collectionState(c: MyCollection): keyof typeof collectionStates {
+  if (c.completedAt) return 'done'
+  if (c.cancelledAt) return 'cancelled'
+  if (c.releaseReason === 'GAVE_UP') return 'gaveUp'
+  if (c.releaseReason === 'RELEASED_BY_OWNER') return 'released'
+  return 'inProgress'
 }
 
 function CollectionList({ collections }: { collections: MyCollection[] }) {
@@ -129,8 +139,7 @@ function CollectionList({ collections }: { collections: MyCollection[] }) {
   return (
     <ul className="flex flex-col gap-3">
       {collections.map((c) => {
-        const state = c.completedAt ? 'done' : c.cancelledAt ? 'cancelled' : 'inProgress'
-        const { label, classes } = collectionStates[state]
+        const { label, classes } = collectionStates[collectionState(c)]
         return (
           <HistoryCard
             key={c.id}
@@ -165,7 +174,7 @@ function HistoryCard({
   badge,
   children,
 }: {
-  occurrence: Omit<Occurrence, 'collection'>
+  occurrence: OccurrenceSummary
   // Foto enviada ao finalizar a coleta (comprovante)
   collectionPhotoUrl: string | null
   badge: ReactNode

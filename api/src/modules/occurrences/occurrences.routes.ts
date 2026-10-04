@@ -61,6 +61,18 @@ occurrencesRouter.post('/:id/complete', requireAuth, requireVerifiedEmail, async
   })
 })
 
+// O coletor desiste: a ocorrência volta a ficar disponível
+occurrencesRouter.post('/:id/give-up', requireAuth, async (req, res) => {
+  const id = parseId(req.params.id)
+  res.json({ occurrence: await collectionsService.giveUpCollection(id, req.userId!) })
+})
+
+// O dono libera uma coleta parada há muito tempo
+occurrencesRouter.post('/:id/release', requireAuth, async (req, res) => {
+  const id = parseId(req.params.id)
+  res.json({ occurrence: await collectionsService.releaseStalledCollection(id, req.userId!) })
+})
+
 // Rota a pé da posição do coletor até o material
 occurrencesRouter.get('/:id/route', requireAuth, async (req, res) => {
   const id = parseId(req.params.id)

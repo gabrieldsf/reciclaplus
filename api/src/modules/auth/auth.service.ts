@@ -8,7 +8,7 @@ import { prisma } from '../../lib/prisma.js'
 import type { LoginInput, RegisterInput } from './auth.schemas.js'
 import { sendVerificationCode } from './email-verification.service.js'
 
-const SALT_ROUNDS = 10
+export const SALT_ROUNDS = 10
 
 // Campos do usuário que podem ser devolvidos pela API (nunca o hash da senha)
 export const publicUserSelect = {

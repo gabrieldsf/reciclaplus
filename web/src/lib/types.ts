@@ -43,13 +43,55 @@ export type Occurrence = {
   category: { id: number; name: string }
   subcategory: { id: number; name: string } | null
   user: PublicUser
-  // Coleta mais recente (em andamento, concluída ou cancelada), se houver
+  // Coleta atual (em andamento, concluída ou cancelada), se houver
   collection: Collection | null
+  // Coletas desfeitas antes (o coletor desistiu ou o dono liberou)
+  releasedCollections: ReleasedCollection[]
 }
+
+// GAVE_UP: o coletor desistiu · RELEASED_BY_OWNER: o dono liberou a coleta parada
+export type ReleaseReason = 'GAVE_UP' | 'RELEASED_BY_OWNER'
+
+export type ReleasedCollection = {
+  id: string
+  acceptedAt: string
+  releasedAt: string
+  releaseReason: ReleaseReason
+  collector: PublicUser
+}
+
+// Resumo da ocorrência usado no histórico (sem as coletas)
+export type OccurrenceSummary = Omit<Occurrence, 'collection' | 'releasedCollections'>
 
 // Item de GET /api/me/collections: a coleta com um resumo da ocorrência
 export type MyCollection = Omit<Collection, 'collector'> & {
-  occurrence: Omit<Occurrence, 'collection'>
+  releasedAt: string | null
+  releaseReason: ReleaseReason | null
+  occurrence: OccurrenceSummary
+}
+
+// GET /api/notifications
+export type NotificationType =
+  | 'COLLECTION_CLAIMED'
+  | 'COLLECTION_COMPLETED'
+  | 'COLLECTION_GAVE_UP'
+  | 'COLLECTION_RELEASED'
+  | 'OCCURRENCE_CANCELLED'
+
+export type AppNotification = {
+  id: string
+  type: NotificationType
+  createdAt: string
+  readAt: string | null
+  actor: { id: string; name: string; avatarUrl: string | null }
+  occurrence: {
+    id: string
+    status: OccurrenceStatus
+    estimatedQuantity: string | null
+    photoUrl: string | null
+    category: { id: number; name: string }
+    subcategory: { id: number; name: string } | null
+  }
 }
 
 // GET /api/stats

@@ -41,10 +41,13 @@ model User {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  occurrences       Occurrence[]
-  collections       Collection[]
-  emailVerification EmailVerification?
-  photos            Photo[]
+  occurrences        Occurrence[]
+  collections        Collection[]
+  emailVerification  EmailVerification?
+  passwordReset      PasswordReset?
+  photos             Photo[]
+  notifications      Notification[]     @relation("NotificationRecipient")
+  actedNotifications Notification[]     @relation("NotificationActor")
 
   @@map("users")
 }
@@ -61,6 +64,19 @@ model EmailVerification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("email_verifications")
+}
+
+// Código para redefinir a senha ("Esqueci minha senha"), no máximo um por usuário
+model PasswordReset {
+  userId    String   @id @map("user_id") @db.Uuid
+  codeHash  String   @map("code_hash")
+  expiresAt DateTime @map("expires_at")
+  attempts  Int      @default(0)
+  sentAt    DateTime @default(now()) @map("sent_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
 }
 
 model Category {
@@ -88,6 +104,11 @@ model Subcategory {
   @@map("subcategories")
 }
 
+enum CollectionReleaseReason {
+  GAVE_UP // o coletor desistiu
+  RELEASED_BY_OWNER // o dono liberou depois de muito tempo parada
+}
+
 model Occurrence {
   id                String           @id @default(uuid()) @db.Uuid
   userId            String           @map("user_id") @db.Uuid
@@ -105,28 +126,33 @@ model Occurrence {
   createdAt         DateTime         @default(now()) @map("created_at")
   updatedAt         DateTime         @updatedAt @map("updated_at")
 
-  user        User         @relation(fields: [userId], references: [id])
-  category    Category     @relation(fields: [categoryId], references: [id])
-  subcategory Subcategory? @relation(fields: [subcategoryId], references: [id])
-  photo       Photo?       @relation("OccurrencePhoto", fields: [photoId], references: [id], onDelete: SetNull)
-  collections Collection[]
+  user          User           @relation(fields: [userId], references: [id])
+  category      Category       @relation(fields: [categoryId], references: [id])
+  subcategory   Subcategory?   @relation(fields: [subcategoryId], references: [id])
+  photo         Photo?         @relation("OccurrencePhoto", fields: [photoId], references: [id], onDelete: SetNull)
+  collections   Collection[]
+  notifications Notification[]
 
   @@index([status, categoryId])
   @@map("occurrences")
 }
 
 model Collection {
-  id                String    @id @default(uuid()) @db.Uuid
-  occurrenceId      String    @map("occurrence_id") @db.Uuid
-  collectorId       String    @map("collector_id") @db.Uuid
-  collectedQuantity String?   @map("collected_quantity")
-  acceptedAt        DateTime  @default(now()) @map("accepted_at")
-  completedAt       DateTime? @map("completed_at")
+  id                String                   @id @default(uuid()) @db.Uuid
+  occurrenceId      String                   @map("occurrence_id") @db.Uuid
+  collectorId       String                   @map("collector_id") @db.Uuid
+  collectedQuantity String?                  @map("collected_quantity")
+  acceptedAt        DateTime                 @default(now()) @map("accepted_at")
+  completedAt       DateTime?                @map("completed_at")
   // Preenchido quando o dono cancela a ocorrência durante a coleta
-  cancelledAt       DateTime? @map("cancelled_at")
+  cancelledAt       DateTime?                @map("cancelled_at")
   observation       String?
   // Foto do material coletado, enviada ao finalizar (opcional)
-  photoId           String?   @unique @map("photo_id") @db.Uuid
+  photoId           String?                  @unique @map("photo_id") @db.Uuid
+  // Coleta desfeita sem cancelar a ocorrência (ela volta a ficar disponível):
+  // o coletor desistiu ou o dono liberou uma coleta parada
+  releasedAt        DateTime?                @map("released_at")
+  releaseReason     CollectionReleaseReason? @map("release_reason")
 
   occurrence Occurrence @relation(fields: [occurrenceId], references: [id])
   collector  User       @relation(fields: [collectorId], references: [id])
@@ -154,4 +180,31 @@ model Photo {
 
   @@index([uploadedBy, createdAt])
   @@map("photos")
+}
+
+enum NotificationType {
+  COLLECTION_CLAIMED // para o dono: alguém assumiu
+  COLLECTION_COMPLETED // para o dono: material coletado
+  COLLECTION_GAVE_UP // para o dono: o coletor desistiu
+  COLLECTION_RELEASED // para o coletor: o dono liberou a coleta
+  OCCURRENCE_CANCELLED // para o coletor: o dono cancelou durante a coleta
+}
+
+// Aviso no sininho: algo aconteceu com uma ocorrência que envolve a pessoa
+model Notification {
+  id           String           @id @default(uuid()) @db.Uuid
+  userId       String           @map("user_id") @db.Uuid
+  type         NotificationType
+  occurrenceId String           @map("occurrence_id") @db.Uuid
+  // Quem causou o aviso (ex.: o coletor que assumiu)
+  actorId      String           @map("actor_id") @db.Uuid
+  createdAt    DateTime         @default(now()) @map("created_at")
+  readAt       DateTime?        @map("read_at")
+
+  user       User       @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor      User       @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  occurrence Occurrence @relation(fields: [occurrenceId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("notifications")
 }

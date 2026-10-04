@@ -41,6 +41,12 @@ export function LoginPage() {
           autoComplete="current-password"
           required
         />
+        <Link
+          to="/esqueci-senha"
+          className="-mt-2 self-end text-sm font-semibold text-brand-700 underline"
+        >
+          Esqueci minha senha
+        </Link>
 
         {error && (
           <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">

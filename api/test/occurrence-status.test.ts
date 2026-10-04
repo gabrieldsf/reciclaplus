@@ -10,6 +10,8 @@ describe('máquina de estados da ocorrência', () => {
     ['IN_COLLECTION', 'COLLECTED'],
     ['AVAILABLE', 'CANCELLED'],
     ['IN_COLLECTION', 'CANCELLED'],
+    // Desistência do coletor ou liberação pelo dono
+    ['IN_COLLECTION', 'AVAILABLE'],
   ] as const)('permite %s → %s', (from, to) => {
     expect(canTransition(from, to)).toBe(true)
   })
@@ -21,13 +23,16 @@ describe('máquina de estados da ocorrência', () => {
     ['COLLECTED', 'CANCELLED'],
     ['CANCELLED', 'AVAILABLE'],
     ['CANCELLED', 'IN_COLLECTION'],
-    ['IN_COLLECTION', 'AVAILABLE'],
   ] as const)('bloqueia %s → %s', (from, to) => {
     expect(canTransition(from, to)).toBe(false)
   })
 
   it('RN04 — somente AVAILABLE pode ser assumida', () => {
     expect(statusesThatCanReach('IN_COLLECTION')).toEqual(['AVAILABLE'])
+  })
+
+  it('só uma coleta em andamento volta a ficar disponível', () => {
+    expect(statusesThatCanReach('AVAILABLE')).toEqual(['IN_COLLECTION'])
   })
 
   it('RN08 — COLLECTED é um estado final', () => {

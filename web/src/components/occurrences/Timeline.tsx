@@ -6,6 +6,7 @@ import type { Occurrence } from '../../lib/types'
 const dotColors: Record<TimelineEvent['key'], string> = {
   created: 'bg-brand-500',
   claimed: 'bg-amber-500',
+  released: 'bg-orange-400',
   collected: 'bg-blue-600',
   cancelled: 'bg-stone-500',
 }
@@ -18,7 +19,7 @@ export function Timeline({ occurrence, viewerId }: { occurrence: Occurrence; vie
       <h3 className="mb-3 text-sm text-brand-700">Histórico</h3>
       <ol className="flex flex-col">
         {events.map((event, index) => (
-          <li key={event.key} className="relative flex gap-3 pb-4 last:pb-0">
+          <li key={event.id} className="relative flex gap-3 pb-4 last:pb-0">
             {index < events.length - 1 && (
               <span
                 aria-hidden="true"

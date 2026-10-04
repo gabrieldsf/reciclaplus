@@ -4,6 +4,7 @@ import { errorHandler } from './middlewares/error-handler.js'
 import { authRouter } from './modules/auth/auth.routes.js'
 import { categoriesRouter } from './modules/categories/categories.routes.js'
 import { meRouter } from './modules/me/me.routes.js'
+import { notificationsRouter } from './modules/notifications/notifications.routes.js'
 import { occurrencesRouter } from './modules/occurrences/occurrences.routes.js'
 import { photosRouter } from './modules/photos/photos.routes.js'
 import { statsRouter } from './modules/stats/stats.routes.js'
@@ -26,6 +27,7 @@ export function createApp() {
   app.use('/api/stats', statsRouter)
   app.use('/api/users', usersRouter)
   app.use('/api/photos', photosRouter)
+  app.use('/api/notifications', notificationsRouter)
   // Caixa de saída simulada: só para testes, nunca em produção
   if (transport() === 'memory' && process.env['NODE_ENV'] !== 'production') {
     app.use('/api/dev/outbox', devOutboxRouter)

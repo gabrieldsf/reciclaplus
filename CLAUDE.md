@@ -32,9 +32,14 @@ recicláveis. Projeto de TCC: a especificação completa está no "Plano Complet
 - RN07 Ao finalizar → COLLECTED.
 - RN08 COLLECTED não pode ser assumida novamente.
 - RN09 Usuário não pode assumir a própria ocorrência.
-- Estados: AVAILABLE → IN_COLLECTION → COLLECTED; AVAILABLE/IN_COLLECTION → CANCELLED.
+- Estados: AVAILABLE ⇄ IN_COLLECTION → COLLECTED; AVAILABLE/IN_COLLECTION → CANCELLED.
 - Decisão (02/10/2026): se o dono cancelar uma ocorrência IN_COLLECTION, a coleta aberta fica no
   histórico como cancelada e o coletor não pode mais finalizá-la.
+- Decisão (04/10/2026): IN_COLLECTION → AVAILABLE quando o coletor desiste (`/give-up`) ou o dono
+  libera uma coleta parada há 24 h (`/release`); a coleta fica com `releasedAt`/`releaseReason`.
+  "Coleta em andamento" = `OPEN_COLLECTION` (sem completedAt, cancelledAt nem releasedAt).
+- Notificações (sininho): criadas com `notify(tx, …)` na mesma transação da mudança; avisam a outra
+  pessoa envolvida (dono ou coletor), nunca quem fez a ação.
 - Concorrência (CT08): assumir uma ocorrência deve ser uma atualização condicional atômica
   (`updateMany where status = AVAILABLE` dentro de transação), nunca "ler e depois gravar".
 

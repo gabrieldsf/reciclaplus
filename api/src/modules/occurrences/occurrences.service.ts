@@ -3,7 +3,8 @@ import { avatarSelect, withAvatarUrl } from '../../lib/avatars.js'
 import { AppError } from '../../lib/errors.js'
 import { prisma } from '../../lib/prisma.js'
 import { assertUsablePhoto, photoUrl } from '../photos/photos.service.js'
-import { statusesThatCanReach } from './occurrence-status.js'
+import { notify } from '../notifications/notifications.service.js'
+import { OPEN_COLLECTION, statusesThatCanReach } from './occurrence-status.js'
 import type {
   CreateOccurrenceInput,
   ListOccurrencesQuery,
@@ -31,15 +32,17 @@ export const occurrenceBaseSelect = {
 
 export const occurrenceSelect = {
   ...occurrenceBaseSelect,
-  // Coleta mais recente (em andamento, concluída ou cancelada junto com a ocorrência)
+  // Todas as coletas, da mais antiga para a mais recente (são poucas por ocorrência:
+  // só há mais de uma quando alguém desistiu ou o dono liberou)
   collections: {
-    orderBy: { acceptedAt: 'desc' },
-    take: 1,
+    orderBy: { acceptedAt: 'asc' },
     select: {
       id: true,
       acceptedAt: true,
       completedAt: true,
       cancelledAt: true,
+      releasedAt: true,
+      releaseReason: true,
       collectedQuantity: true,
       observation: true,
       photoId: true,
@@ -57,15 +60,26 @@ export function toBaseOccurrenceResponse({ photoId, ...occurrence }: BaseOccurre
   return { ...occurrence, photoUrl: photoUrl(photoId), user: withAvatarUrl(occurrence.user) }
 }
 
-// Formato devolvido pela API: a coleta mais recente vira `collection` (ou null)
+// Formato devolvido pela API:
+//   collection          → a coleta atual (em andamento, concluída ou cancelada) ou null
+//   releasedCollections → coletas desfeitas antes (desistência ou liberação pelo dono)
 export function toOccurrenceResponse({ collections, ...occurrence }: SelectedOccurrence) {
-  const latest = collections[0]
+  const current = collections.findLast((c) => c.releasedAt === null)
   let collection = null
-  if (latest) {
-    const { photoId, ...rest } = latest
+  if (current) {
+    const { photoId, releasedAt: _, releaseReason: __, ...rest } = current
     collection = { ...rest, photoUrl: photoUrl(photoId), collector: withAvatarUrl(rest.collector) }
   }
-  return { ...toBaseOccurrenceResponse(occurrence), collection }
+  const releasedCollections = collections
+    .filter((c) => c.releasedAt !== null)
+    .map((c) => ({
+      id: c.id,
+      acceptedAt: c.acceptedAt,
+      releasedAt: c.releasedAt!,
+      releaseReason: c.releaseReason!,
+      collector: withAvatarUrl(c.collector),
+    }))
+  return { ...toBaseOccurrenceResponse(occurrence), collection, releasedCollections }
 }
 
 const MAX_LIST_RESULTS = 500
@@ -175,12 +189,24 @@ export async function cancelOccurrence(id: string, userId: string) {
       data: { status: 'CANCELLED' },
     })
     // Decisão do projeto: a coleta em andamento fica registrada como cancelada
-    // e o coletor não pode mais finalizá-la
+    // e o coletor não pode mais finalizá-la (e é avisado)
     if (count > 0) {
+      const open = await tx.collection.findMany({
+        where: { occurrenceId: id, ...OPEN_COLLECTION },
+        select: { collectorId: true },
+      })
       await tx.collection.updateMany({
-        where: { occurrenceId: id, completedAt: null, cancelledAt: null },
+        where: { occurrenceId: id, ...OPEN_COLLECTION },
         data: { cancelledAt: new Date() },
       })
+      for (const { collectorId } of open) {
+        await notify(tx, {
+          userId: collectorId,
+          type: 'OCCURRENCE_CANCELLED',
+          occurrenceId: id,
+          actorId: userId,
+        })
+      }
     }
     return count
   })

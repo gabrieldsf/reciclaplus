@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
+import { useNotifications } from '../notifications/NotificationsContext'
 import { UserAvatar } from './UserAvatar'
 import { VerifyEmailLink } from './VerifyEmailLink'
 
@@ -34,6 +35,7 @@ function desktopClasses(item: NavItem, isActive: boolean) {
 // A página ocupa exatamente a altura da tela; o conteúdo rola dentro do <main>.
 export function AppLayout() {
   const { user } = useAuth()
+  const { unreadCount } = useNotifications()
 
   return (
     <div className="flex h-dvh flex-col bg-brand-50 text-brand-900">
@@ -56,18 +58,40 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        {/* Perfil no canto superior direito (celular e desktop) */}
+        {/* Sininho e perfil no canto superior direito (celular e desktop) */}
         {user ? (
-          <NavLink
-            to="/perfil"
-            aria-label="Perfil"
-            title={user.name}
-            className={({ isActive }) =>
-              `rounded-full md:ml-3 ${isActive ? 'ring-2 ring-brand-500 ring-offset-2' : 'hover:opacity-90'}`
-            }
-          >
-            <UserAvatar user={user} />
-          </NavLink>
+          <div className="flex items-center gap-2 md:ml-3">
+            <NavLink
+              to="/notificacoes"
+              aria-label={
+                unreadCount > 0 ? `Notificações (${unreadCount} não lidas)` : 'Notificações'
+              }
+              title="Notificações"
+              className={({ isActive }) =>
+                `relative grid size-10 place-items-center rounded-full text-xl ${isActive ? 'bg-brand-100' : 'hover:bg-brand-50'}`
+              }
+            >
+              <span aria-hidden="true">🔔</span>
+              {unreadCount > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-0.5 -right-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[11px] leading-none font-bold text-white ring-2 ring-white"
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </NavLink>
+            <NavLink
+              to="/perfil"
+              aria-label="Perfil"
+              title={user.name}
+              className={({ isActive }) =>
+                `rounded-full ${isActive ? 'ring-2 ring-brand-500 ring-offset-2' : 'hover:opacity-90'}`
+              }
+            >
+              <UserAvatar user={user} />
+            </NavLink>
+          </div>
         ) : (
           <Link
             to="/entrar"

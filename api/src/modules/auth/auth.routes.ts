@@ -1,9 +1,15 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { requireAuth } from '../../middlewares/require-auth.js'
-import { loginSchema, registerSchema } from './auth.schemas.js'
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from './auth.schemas.js'
 import * as authService from './auth.service.js'
 import * as verification from './email-verification.service.js'
+import * as passwordReset from './password-reset.service.js'
 
 export const authRouter = Router()
 
@@ -37,4 +43,18 @@ authRouter.post('/verify-email', requireAuth, async (req, res) => {
 authRouter.post('/verify-email/resend', requireAuth, async (req, res) => {
   await verification.resendVerificationCode(req.userId!)
   res.status(202).json({ message: 'Enviamos um novo código para o seu e-mail' })
+})
+
+// Esqueci minha senha: a resposta é a mesma com ou sem conta para o e-mail
+authRouter.post('/password/forgot', async (req, res) => {
+  const { email } = forgotPasswordSchema.parse(req.body)
+  await passwordReset.requestPasswordReset(email)
+  res.status(202).json({
+    message: 'Se houver uma conta com este e-mail, enviamos um código para criar uma nova senha',
+  })
+})
+
+authRouter.post('/password/reset', async (req, res) => {
+  const { email, code, password } = resetPasswordSchema.parse(req.body)
+  res.json(await passwordReset.resetPassword(email, code, password))
 })
