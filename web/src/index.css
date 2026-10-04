@@ -34,80 +34,57 @@
   font-family: inherit;
 }
 
-/* Come-come do coletor (personagem próprio do Recicla+): amarelo, com folhinha e o
-   símbolo de reciclagem; duas metades abrem e fecham a boca, que aponta para a direita,
-   e o ícone gira na direção do caminho */
-.comecome {
+/* Coletor no caminho: avatar redondo com anel amarelo (cor das bolinhas) e uma setinha
+   que gira para a direção do caminho */
+.collector-marker {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.4));
 }
 
-.comecome-half {
+.collector-heading {
   position: absolute;
-  left: 0;
-  width: 36px;
-  height: 18px;
-  background: #facc15;
-  border: 2px solid #a16207;
-  animation: comecome-top 0.35s ease-in-out infinite alternate;
+  inset: 0;
 }
 
-.comecome-half.top {
-  top: 0;
-  border-bottom: 0;
-  border-radius: 18px 18px 0 0;
-  transform-origin: 50% 100%;
-}
-
-.comecome-half.bottom {
-  top: 18px;
+.collector-heading::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  translate: -50% 0;
+  border: 7px solid transparent;
   border-top: 0;
-  border-radius: 0 0 18px 18px;
-  transform-origin: 50% 0;
-  animation-name: comecome-bottom;
+  border-bottom: 9px solid #f59e0b;
 }
 
-.comecome-eye {
+.collector-face {
   position: absolute;
-  top: 4px;
-  left: 17px;
-  width: 5px;
-  height: 5px;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   border-radius: 50%;
-  background: #1f2937;
+  border: 3px solid #f59e0b;
+  background: #1b4332;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  animation: collector-pulse 1.6s ease-in-out infinite alternate;
 }
 
-.comecome-leaf {
-  position: absolute;
-  top: -8px;
-  left: 8px;
-  width: 9px;
-  height: 12px;
-  border-radius: 0 100% 0 100%;
-  background: #16a34a;
-  transform: rotate(-20deg);
+.collector-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
 }
 
-.comecome-recycle {
-  position: absolute;
-  top: 1px;
-  left: 7px;
-  width: 11px;
-  height: 11px;
-  color: #166534;
-}
-
-@keyframes comecome-top {
+@keyframes collector-pulse {
   to {
-    transform: rotate(-32deg);
-  }
-}
-
-@keyframes comecome-bottom {
-  to {
-    transform: rotate(32deg);
+    border-color: #facc15;
+    box-shadow: 0 0 0 4px rgb(250 204 21 / 0.35);
   }
 }
 
@@ -136,14 +113,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .comecome-half,
+  .collector-face,
   .active-destination.selected .category-marker {
     animation: none;
-  }
-  .comecome-half.top {
-    transform: rotate(-20deg);
-  }
-  .comecome-half.bottom {
-    transform: rotate(20deg);
   }
 }

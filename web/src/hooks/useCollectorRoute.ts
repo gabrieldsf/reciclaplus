@@ -16,7 +16,7 @@ const REFETCH_MS = 20_000
 const PROGRESS_SPACING_M = 10
 
 // Busca a rota do coletor até a ocorrência e calcula o progresso pela posição atual:
-// quanto falta, para onde o come-come olha e o trecho ainda não percorrido.
+// quanto falta, para onde a seta do coletor aponta e o trecho ainda não percorrido.
 export function useCollectorRoute(
   occurrenceId: string | null,
   position: LatLng | null,

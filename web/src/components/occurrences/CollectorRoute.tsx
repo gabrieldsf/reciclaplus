@@ -9,7 +9,7 @@ import { categoryIcon } from '../map/markers'
 import { RouteLayer } from '../map/RouteLayer'
 import { NavigationButtons } from './NavigationButtons'
 
-// Rota do coletor nos detalhes da ocorrência: bolinhas pelo caminho, que o come-come
+// Rota do coletor nos detalhes da ocorrência: bolinhas pelo caminho, que o avatar do coletor
 // vai "comendo" conforme a pessoa anda, e atalhos para o GPS do celular
 export function CollectorRoute({ occurrence }: { occurrence: Occurrence }) {
   const { position, error } = useWatchPosition()

@@ -1,5 +1,5 @@
 // Geometria da rota do coletor: bolinhas ao longo do caminho, quais já foram
-// "comidas", direção do come-come e distância que falta.
+// "comidas", direção do coletor e distância que falta.
 import { distanceKm, formatDistance } from './geo'
 import type { LatLng } from './types'
 

@@ -78,8 +78,8 @@ export function ActiveCollections({
                   Coletas em andamento ({collections.length}/{MAX_ACTIVE})
                 </h2>
                 <p className="text-sm text-brand-700">
-                  Escolha para onde o come-come vai. Você pode ter até {MAX_ACTIVE} coletas ao mesmo
-                  tempo.
+                  Escolha para qual coleta mostrar o caminho. Você pode ter até {MAX_ACTIVE} coletas
+                  ao mesmo tempo.
                 </p>
               </div>
 

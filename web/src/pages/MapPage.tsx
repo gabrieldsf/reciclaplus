@@ -57,7 +57,7 @@ export function MapPage() {
   // Erro de localização só é exibido se o usuário pediu explicitamente (botão 📍)
   const [locationRequested, setLocationRequested] = useState(false)
 
-  // Coletas em andamento: a rota com o come-come aparece no mapa principal.
+  // Coletas em andamento: a rota com o avatar do coletor aparece no mapa principal.
   // Com alguma ativa, a posição passa a ser acompanhada em tempo real.
   const active = useActiveCollections(position)
   const { position: livePosition } = useWatchPosition({ enabled: active.collections.length > 0 })
@@ -107,7 +107,7 @@ export function MapPage() {
         <BaseMap className="absolute inset-0">
           {!hadSavedLocation && !position && <FitToOccurrences occurrences={occurrences} />}
           <FlyTo position={position} />
-          {/* Com rota ativa, o come-come ocupa o lugar do ponto azul */}
+          {/* Com rota ativa, o avatar do coletor ocupa o lugar do ponto azul */}
           {position && !active.selected && <UserLocationMarker position={position} />}
           {active.collections.map((c) => (
             <Marker

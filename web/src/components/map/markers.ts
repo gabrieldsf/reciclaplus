@@ -28,23 +28,22 @@ export const pickerIcon = divIcon({
   iconAnchor: [18, 36],
 })
 
-// Símbolo de reciclagem (seta circular do logo do Recicla+) no corpo do come-come
-const RECYCLE_SVG =
-  '<svg class="comecome-recycle" viewBox="0 0 512 512" aria-hidden="true"><path d="M346 149 A140 140 0 1 1 208 124.4" fill="none" stroke="currentColor" stroke-width="64" stroke-linecap="round"/><path d="M262 104 L180 76 L214 180 Z" fill="currentColor" stroke="currentColor" stroke-width="24" stroke-linejoin="round"/></svg>'
+const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 
-// Come-come do coletor, virado para a direção do caminho. A boca desenhada aponta para a
-// direita (leste = 90°); indo para a esquerda, espelha para o olho continuar em cima.
-export function comecomeIcon(heading: number) {
-  const rotation = Math.round(heading - 90)
-  const mirror = heading > 180 ? ' scaleY(-1)' : ''
+// Coletor no caminho: foto ou avatar do perfil (sem nenhum, a inicial do nome) com anel
+// amarelo e uma setinha apontando para a direção do caminho (0° = norte)
+export function collectorIcon(user: { name: string; avatarUrl: string | null }, heading: number) {
+  const face = user.avatarUrl
+    ? `<img src="${escapeHtml(user.avatarUrl)}" alt="" />`
+    : `<span>${escapeHtml(user.name.trim().charAt(0).toUpperCase())}</span>`
   return divIcon({
     className: '',
-    html: `<div class="comecome" style="transform: rotate(${rotation}deg)${mirror}" role="img" aria-label="Você">
-      <div class="comecome-half top"><span class="comecome-eye"></span><span class="comecome-leaf"></span></div>
-      <div class="comecome-half bottom">${RECYCLE_SVG}</div>
+    html: `<div class="collector-marker" role="img" aria-label="Você">
+      <div class="collector-heading" style="transform: rotate(${Math.round(heading)}deg)"></div>
+      <div class="collector-face">${face}</div>
     </div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
   })
 }
 

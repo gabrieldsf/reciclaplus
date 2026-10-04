@@ -3,7 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CircleMarker, Marker, Polyline, useMap, useMapEvents } from 'react-leaflet'
 import { dotSpacingMeters, dotsAlong } from '../../lib/route'
 import type { LatLng } from '../../lib/types'
-import { comecomeIcon } from './markers'
+import { useAuth } from '../../auth/AuthContext'
+import { collectorIcon } from './markers'
 
 type RouteLayerProps = {
   // Trecho que falta: posição atual → … → material
@@ -16,7 +17,7 @@ type RouteLayerProps = {
 }
 
 // Desenha o caminho do coletor dentro de um mapa: linha fininha + bolinhas espaçadas
-// pela tela (não por metros) + come-come na posição atual
+// pela tela (não por metros) + avatar do coletor na posição atual
 export function RouteLayer({
   remainingPath,
   position,
@@ -25,6 +26,7 @@ export function RouteLayer({
   fullPath,
 }: RouteLayerProps) {
   const map = useMap()
+  const { user } = useAuth()
   const [zoom, setZoom] = useState(() => map.getZoom())
   useMapEvents({ zoomend: () => setZoom(map.getZoom()) })
 
@@ -65,10 +67,10 @@ export function RouteLayer({
           pathOptions={{ color: '#ffffff', weight: 1.5, fillColor: '#f59e0b', fillOpacity: 1 }}
         />
       ))}
-      {position && (
+      {position && user && (
         <Marker
           position={[position.latitude, position.longitude]}
-          icon={comecomeIcon(heading)}
+          icon={collectorIcon(user, heading)}
           zIndexOffset={1000}
           interactive={false}
         />
