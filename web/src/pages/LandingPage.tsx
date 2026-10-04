@@ -150,8 +150,10 @@ export function LandingPage() {
                   label: 'participantes',
                 },
               ].map(({ value, label }) => (
-                <div key={label} className="flex flex-col-reverse">
-                  <dt className="text-xs text-brand-100 md:text-sm">{label}</dt>
+                // Número em cima, rótulo embaixo; justify-end (= topo, na coluna invertida)
+                // mantém os números alinhados mesmo quando um rótulo quebra em 2 linhas
+                <div key={label} className="flex flex-col-reverse justify-end">
+                  <dt className="text-xs leading-tight text-brand-100 md:text-sm">{label}</dt>
                   <dd className="text-2xl font-extrabold tabular-nums md:text-4xl">{value}</dd>
                 </div>
               ))}
@@ -219,7 +221,7 @@ export function LandingPage() {
               Tem algo para descartar ou doar?
             </h2>
             <p className="max-w-md text-brand-100">
-              Em menos de um minuto você informa e alguém da sua região pode coletar.
+              Informe em poucos toques e alguém perto de você dá um novo destino ao material.
             </p>
             <Link
               to="/informar"
@@ -232,7 +234,7 @@ export function LandingPage() {
       </main>
 
       <footer className="border-t border-brand-100 px-4 py-6 text-center text-sm text-brand-700">
-        Recicla+ · Trabalho de Conclusão de Curso
+        © 2026 Recicla+
       </footer>
     </div>
   )
