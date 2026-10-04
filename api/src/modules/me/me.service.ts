@@ -19,10 +19,11 @@ export async function listMyOccurrences(userId: string) {
   return occurrences.map(toOccurrenceResponse)
 }
 
-// Coletas assumidas pelo usuário (em andamento, concluídas ou canceladas pelo dono)
-export async function listMyCollections(userId: string) {
+// Coletas assumidas pelo usuário (em andamento, concluídas ou canceladas pelo dono).
+// Com `active`, só as em andamento (usadas pela rota no mapa).
+export async function listMyCollections(userId: string, { active = false } = {}) {
   const collections = await prisma.collection.findMany({
-    where: { collectorId: userId },
+    where: { collectorId: userId, ...(active && { completedAt: null, cancelledAt: null }) },
     orderBy: { acceptedAt: 'desc' },
     take: MAX_HISTORY_RESULTS,
     select: {

@@ -34,43 +34,44 @@
   font-family: inherit;
 }
 
-/* Come-come do coletor (personagem próprio do Recicla+): duas metades que abrem e
-   fecham a boca; a boca aponta para a direita e o ícone gira na direção do caminho */
+/* Come-come do coletor (personagem próprio do Recicla+): amarelo, com folhinha e o
+   símbolo de reciclagem; duas metades abrem e fecham a boca, que aponta para a direita,
+   e o ícone gira na direção do caminho */
 .comecome {
   position: relative;
-  width: 34px;
-  height: 34px;
-  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35));
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.4));
 }
 
 .comecome-half {
   position: absolute;
   left: 0;
-  width: 34px;
-  height: 17px;
-  background: #22c55e;
-  border: 2px solid #ffffff;
+  width: 36px;
+  height: 18px;
+  background: #facc15;
+  border: 2px solid #a16207;
   animation: comecome-top 0.35s ease-in-out infinite alternate;
 }
 
 .comecome-half.top {
   top: 0;
   border-bottom: 0;
-  border-radius: 17px 17px 0 0;
+  border-radius: 18px 18px 0 0;
   transform-origin: 50% 100%;
 }
 
 .comecome-half.bottom {
-  top: 17px;
+  top: 18px;
   border-top: 0;
-  border-radius: 0 0 17px 17px;
+  border-radius: 0 0 18px 18px;
   transform-origin: 50% 0;
   animation-name: comecome-bottom;
 }
 
 .comecome-eye {
   position: absolute;
-  top: 5px;
+  top: 4px;
   left: 17px;
   width: 5px;
   height: 5px;
@@ -80,13 +81,22 @@
 
 .comecome-leaf {
   position: absolute;
-  top: -7px;
-  left: 9px;
+  top: -8px;
+  left: 8px;
   width: 9px;
   height: 12px;
   border-radius: 0 100% 0 100%;
-  background: #15803d;
+  background: #16a34a;
   transform: rotate(-20deg);
+}
+
+.comecome-recycle {
+  position: absolute;
+  top: 1px;
+  left: 7px;
+  width: 11px;
+  height: 11px;
+  color: #166534;
 }
 
 @keyframes comecome-top {
@@ -101,8 +111,33 @@
   }
 }
 
+/* Destino de coleta em andamento: anel pulsando no escolhido para a rota */
+.active-destination .category-marker {
+  box-shadow:
+    0 0 0 3px #facc15,
+    0 2px 6px rgb(0 0 0 / 0.35);
+}
+
+.active-destination.selected .category-marker {
+  animation: destination-pulse 1.6s ease-out infinite;
+}
+
+@keyframes destination-pulse {
+  0% {
+    box-shadow:
+      0 0 0 3px #facc15,
+      0 0 0 3px rgb(250 204 21 / 0.6);
+  }
+  100% {
+    box-shadow:
+      0 0 0 3px #facc15,
+      0 0 0 16px rgb(250 204 21 / 0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .comecome-half {
+  .comecome-half,
+  .active-destination.selected .category-marker {
     animation: none;
   }
   .comecome-half.top {

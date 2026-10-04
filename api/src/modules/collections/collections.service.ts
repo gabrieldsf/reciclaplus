@@ -5,6 +5,12 @@ import { statusesThatCanReach } from '../occurrences/occurrence-status.js'
 import { getOccurrence } from '../occurrences/occurrences.service.js'
 import type { CompleteCollectionInput } from './collections.schemas.js'
 
+// Regra do projeto: cada pessoa pode ter no máximo 3 coletas em andamento, para que
+// ninguém "reserve" muitas ocorrências sem buscá-las
+export const MAX_ACTIVE_COLLECTIONS = 3
+
+const LIMIT_MESSAGE = `Você já tem ${MAX_ACTIVE_COLLECTIONS} coletas em andamento. Finalize uma antes de assumir outra.`
+
 // Assumir uma ocorrência para coleta (RN04, RN05, RN09; CT07, CT08, CT09, CT12)
 export async function claimOccurrence(occurrenceId: string, collectorId: string) {
   const occurrence = await prisma.occurrence.findUnique({
@@ -17,6 +23,16 @@ export async function claimOccurrence(occurrenceId: string, collectorId: string)
   }
 
   const claimed = await prisma.$transaction(async (tx) => {
+    // Trava por coletor até o fim da transação: pedidos simultâneos da mesma pessoa
+    // são contados um de cada vez, então o limite não é furado
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${collectorId}))`
+    const active = await tx.collection.count({
+      where: { collectorId, completedAt: null, cancelledAt: null },
+    })
+    if (active >= MAX_ACTIVE_COLLECTIONS) {
+      throw new AppError(409, LIMIT_MESSAGE, [], 'ACTIVE_COLLECTIONS_LIMIT')
+    }
+
     // Atualização condicional atômica: entre vários pedidos simultâneos, o banco
     // garante que só um encontra a ocorrência ainda AVAILABLE e a altera
     const { count } = await tx.occurrence.updateMany({

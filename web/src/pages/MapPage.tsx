@@ -1,15 +1,20 @@
 import { latLngBounds } from 'leaflet'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Marker, Popup, useMap } from 'react-leaflet'
 import { BaseMap } from '../components/map/BaseMap'
-import { categoryIcon } from '../components/map/markers'
+import { ActiveCollections } from '../components/map/ActiveCollections'
+import { activeDestinationIcon, categoryIcon } from '../components/map/markers'
 import { moveMapTo } from '../components/map/moveMapTo'
+import { RouteLayer } from '../components/map/RouteLayer'
 import { UserLocationMarker } from '../components/map/UserLocationMarker'
 import { CategoryFilter } from '../components/occurrences/CategoryFilter'
+import { useActiveCollections } from '../hooks/useActiveCollections'
 import { useCategories } from '../hooks/useCategories'
+import { useCollectorRoute } from '../hooks/useCollectorRoute'
 import { useCurrentPosition } from '../hooks/useCurrentPosition'
 import type { DevicePosition } from '../hooks/useCurrentPosition'
+import { useWatchPosition } from '../hooks/useWatchPosition'
 import { api } from '../lib/api'
 import { categoryStyle } from '../lib/categories'
 import { formatDateTime } from '../lib/format'
@@ -52,6 +57,18 @@ export function MapPage() {
   // Erro de localização só é exibido se o usuário pediu explicitamente (botão 📍)
   const [locationRequested, setLocationRequested] = useState(false)
 
+  // Coletas em andamento: a rota com o come-come aparece no mapa principal.
+  // Com alguma ativa, a posição passa a ser acompanhada em tempo real.
+  const active = useActiveCollections(position)
+  const { position: livePosition } = useWatchPosition({ enabled: active.collections.length > 0 })
+  const routePosition = livePosition ?? position
+  const target = active.selected?.occurrence
+  const destination = useMemo(
+    () => (target ? { latitude: target.latitude, longitude: target.longitude } : null),
+    [target],
+  )
+  const progress = useCollectorRoute(target?.id ?? null, routePosition, destination)
+
   // Começa com todas as categorias marcadas
   const selectedIds = selected ?? new Set(categories.map((c) => c.id))
   const allSelected = selectedIds.size === categories.length
@@ -90,7 +107,26 @@ export function MapPage() {
         <BaseMap className="absolute inset-0">
           {!hadSavedLocation && !position && <FitToOccurrences occurrences={occurrences} />}
           <FlyTo position={position} />
-          {position && <UserLocationMarker position={position} />}
+          {/* Com rota ativa, o come-come ocupa o lugar do ponto azul */}
+          {position && !active.selected && <UserLocationMarker position={position} />}
+          {active.collections.map((c) => (
+            <Marker
+              key={c.id}
+              position={[c.occurrence.latitude, c.occurrence.longitude]}
+              icon={activeDestinationIcon(c.occurrence.category.name, c.id === active.selected?.id)}
+              title={`Coleta em andamento: ${c.occurrence.category.name}`}
+              eventHandlers={{ click: () => active.select(c.id) }}
+            />
+          ))}
+          {active.selected && progress && (
+            <RouteLayer
+              remainingPath={progress.remainingPath}
+              position={routePosition}
+              heading={progress.heading}
+              fitKey={progress.route ? active.selected.id : null}
+              fullPath={progress.route?.path ?? null}
+            />
+          )}
           {occurrences.map((occurrence) => (
             <Marker
               key={occurrence.id}
@@ -109,22 +145,30 @@ export function MapPage() {
           ))}
         </BaseMap>
 
-        <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center px-3">
+        <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex flex-col items-center gap-2 px-3">
           <p className="pointer-events-auto rounded-full bg-white/95 px-3 py-1 text-sm font-medium shadow">
             {occurrences.length === 1
               ? '1 ocorrência disponível'
               : `${occurrences.length} ocorrências disponíveis`}
           </p>
+          {active.selected && (
+            <ActiveCollections
+              collections={active.collections}
+              selected={active.selected}
+              onSelect={active.select}
+              position={routePosition}
+              leftMeters={progress?.leftMeters ?? null}
+            />
+          )}
+          {error && (
+            <p
+              role="alert"
+              className="pointer-events-auto w-full rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 shadow"
+            >
+              {error}
+            </p>
+          )}
         </div>
-
-        {error && (
-          <p
-            role="alert"
-            className="absolute inset-x-3 top-14 z-[1000] rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 shadow"
-          >
-            {error}
-          </p>
-        )}
 
         <div className="absolute right-3 bottom-4 left-3 z-[1000] flex items-end justify-between gap-2">
           <button

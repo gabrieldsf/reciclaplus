@@ -1,6 +1,6 @@
 // Geometria da rota do coletor: bolinhas ao longo do caminho, quais já foram
 // "comidas", direção do come-come e distância que falta.
-import { distanceKm } from './geo'
+import { distanceKm, formatDistance } from './geo'
 import type { LatLng } from './types'
 
 const meters = (a: LatLng, b: LatLng) => distanceKm(a, b) * 1000
@@ -89,4 +89,20 @@ export function navigationLinks({ latitude, longitude }: LatLng) {
     googleMaps: `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
     waze: `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`,
   }
+}
+
+// Metros representados por 1 pixel no zoom e latitude atuais (projeção do mapa)
+export function metersPerPixel(zoom: number, latitude: number) {
+  return (156_543.03392 * Math.cos((latitude * Math.PI) / 180)) / 2 ** zoom
+}
+
+// Espaço entre as bolinhas desenhadas: fixo na tela (~18 px), em qualquer zoom.
+// Assim, com o mapa afastado, elas não se amontoam numa linha borrada.
+export function dotSpacingMeters(zoom: number, latitude: number, pixels = 18) {
+  return Math.max(8, pixels * metersPerPixel(zoom, latitude))
+}
+
+// Distância que falta ("Faltam 850 m") ou "Você chegou!" a menos de 25 m
+export function formatLeft(meters: number) {
+  return meters < 25 ? 'Você chegou! 🎉' : `Faltam ${formatDistance(meters / 1000)}`
 }

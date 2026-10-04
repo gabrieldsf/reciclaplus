@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { distanceKm } from './geo'
 import {
   bearing,
+  dotSpacingMeters,
   dotsAlong,
   isOffRoute,
+  metersPerPixel,
   navigationLinks,
   remainingDots,
   remainingMeters,
@@ -84,5 +86,21 @@ describe('navigationLinks', () => {
       googleMaps: 'https://www.google.com/maps/dir/?api=1&destination=-25.429,-49.278',
       waze: 'https://waze.com/ul?ll=-25.429,-49.278&navigate=yes',
     })
+  })
+})
+
+describe('dotSpacingMeters', () => {
+  it('no zoom 15 em Curitiba, ~4,3 m por pixel → ~77 m entre bolinhas', () => {
+    expect(metersPerPixel(15, -25.43)).toBeCloseTo(4.31, 1)
+    expect(dotSpacingMeters(15, -25.43)).toBeCloseTo(77.6, 0)
+  })
+
+  it('afastar o mapa (zoom menor) espaça mais as bolinhas; aproximar, menos', () => {
+    expect(dotSpacingMeters(12, -25.43)).toBeGreaterThan(dotSpacingMeters(15, -25.43) * 7)
+    expect(dotSpacingMeters(18, -25.43)).toBeLessThan(dotSpacingMeters(15, -25.43))
+  })
+
+  it('nunca fica menor que 8 m (zoom máximo)', () => {
+    expect(dotSpacingMeters(22, -25.43)).toBe(8)
   })
 })

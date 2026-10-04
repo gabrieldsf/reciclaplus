@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { saveLastLocation } from '../lib/geo'
 import type { LatLng } from '../lib/types'
 
-// Acompanha a posição do aparelho enquanto o componente estiver na tela
-// (o navegador só entrega a localização com o app aberto)
-export function useWatchPosition() {
+// Acompanha a posição do aparelho enquanto o componente estiver na tela e `enabled`
+// for verdadeiro (o navegador só entrega a localização com o app aberto)
+export function useWatchPosition({ enabled = true } = {}) {
   const [position, setPosition] = useState<LatLng | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
+    if (!enabled) return
     if (!('geolocation' in navigator)) {
       queueMicrotask(() => setError('Seu navegador não oferece localização.'))
       return
@@ -29,7 +30,7 @@ export function useWatchPosition() {
       { enableHighAccuracy: true, maximumAge: 5_000, timeout: 20_000 },
     )
     return () => navigator.geolocation.clearWatch(id)
-  }, [])
+  }, [enabled])
 
   return { position, error }
 }

@@ -227,3 +227,85 @@ describe('cancelamento pelo dono durante a coleta', () => {
     }
   })
 })
+
+describe('limite de 3 coletas em andamento por pessoa', () => {
+  async function occurrencesOf(count: number) {
+    const owner = await registerUser()
+    const ids: string[] = []
+    for (let i = 0; i < count; i++) {
+      ids.push((await createOccurrence(owner.token)).body.occurrence.id)
+    }
+    return { owner, ids }
+  }
+
+  it('a 4ª coleta simultânea é recusada', async () => {
+    const { ids } = await occurrencesOf(4)
+    const collector = await registerUser()
+    for (const id of ids.slice(0, 3)) {
+      expect((await claim(id, collector.token)).status).toBe(200)
+    }
+
+    const fourth = await claim(ids[3]!, collector.token)
+
+    expect(fourth.status).toBe(409)
+    expect(fourth.body).toMatchObject({
+      code: 'ACTIVE_COLLECTIONS_LIMIT',
+      message: 'Você já tem 3 coletas em andamento. Finalize uma antes de assumir outra.',
+    })
+    const stored = await prisma.occurrence.findUniqueOrThrow({ where: { id: ids[3]! } })
+    expect(stored.status).toBe('AVAILABLE')
+  })
+
+  it('finalizar ou ter a coleta cancelada libera uma vaga', async () => {
+    const { owner, ids } = await occurrencesOf(5)
+    const collector = await registerUser()
+    for (const id of ids.slice(0, 3)) await claim(id, collector.token)
+
+    await complete(ids[0]!, collector.token)
+    expect((await claim(ids[3]!, collector.token)).status).toBe(200)
+
+    await request(app).post(`/api/occurrences/${ids[1]}/cancel`).set(auth(owner.token))
+    expect((await claim(ids[4]!, collector.token)).status).toBe(200)
+  })
+
+  it('pedidos simultâneos da mesma pessoa não furam o limite', async () => {
+    const { ids } = await occurrencesOf(6)
+    const collector = await registerUser()
+
+    const results = await Promise.all(ids.map((id) => claim(id, collector.token)))
+
+    expect(results.filter((r) => r.status === 200)).toHaveLength(3)
+    expect(results.filter((r) => r.status === 409)).toHaveLength(3)
+    const active = await prisma.collection.count({
+      where: { collectorId: collector.res.body.user.id, completedAt: null, cancelledAt: null },
+    })
+    expect(active).toBe(3)
+  })
+
+  it('o limite é por pessoa: outro coletor continua podendo assumir', async () => {
+    const { ids } = await occurrencesOf(4)
+    const busy = await registerUser()
+    const other = await registerUser()
+    for (const id of ids.slice(0, 3)) await claim(id, busy.token)
+
+    expect((await claim(ids[3]!, other.token)).status).toBe(200)
+  })
+})
+
+describe('GET /api/me/collections?active=true', () => {
+  it('lista só as coletas em andamento', async () => {
+    const owner = await registerUser()
+    const collector = await registerUser()
+    const a = (await createOccurrence(owner.token)).body.occurrence.id
+    const b = (await createOccurrence(owner.token)).body.occurrence.id
+    await claim(a, collector.token)
+    await claim(b, collector.token)
+    await complete(a, collector.token)
+
+    const res = await request(app).get('/api/me/collections?active=true').set(auth(collector.token))
+
+    expect(
+      res.body.collections.map((c: { occurrence: { id: string } }) => c.occurrence.id),
+    ).toEqual([b])
+  })
+})
