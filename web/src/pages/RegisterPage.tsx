@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext'
 import type { RegisterData } from '../auth/AuthContext'
 import { TextField } from '../components/TextField'
 import { ApiError } from '../lib/api'
+import { suggestEmail } from '../lib/email-suggest'
 import { AuthLayout } from './AuthLayout'
 
 export function RegisterPage() {
@@ -12,6 +13,8 @@ export function RegisterPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [userType, setUserType] = useState<RegisterData['userType']>('PERSON')
+  const [email, setEmail] = useState('')
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
@@ -27,7 +30,7 @@ export function RegisterPage() {
     try {
       await register({
         name: String(form.get('name')),
-        email: String(form.get('email')),
+        email,
         password: String(form.get('password')),
         userType,
       })
@@ -78,14 +81,39 @@ export function RegisterPage() {
           required
           error={fieldErrors['name']}
         />
-        <TextField
-          label="E-mail"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          error={fieldErrors['email']}
-        />
+        <div className="flex flex-col gap-1">
+          <TextField
+            label="E-mail"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              setEmailSuggestion(null)
+            }}
+            // Sugere a correção ao sair do campo: "gmial.com" → "gmail.com"
+            onBlur={() => setEmailSuggestion(suggestEmail(email))}
+            error={fieldErrors['email']}
+          />
+          {emailSuggestion && (
+            <p className="text-sm text-amber-800">
+              Você quis dizer{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail(emailSuggestion)
+                  setEmailSuggestion(null)
+                }}
+                className="font-semibold underline"
+              >
+                {emailSuggestion}
+              </button>
+              ?
+            </p>
+          )}
+        </div>
         <TextField
           label="Senha (mínimo 8 caracteres)"
           name="password"

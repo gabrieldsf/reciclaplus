@@ -11,7 +11,12 @@ export type Category = {
 
 export type OccurrenceStatus = 'AVAILABLE' | 'IN_COLLECTION' | 'COLLECTED' | 'CANCELLED'
 
-type PublicUser = { id: string; name: string; userType: 'PERSON' | 'COMPANY' | 'ADMIN' }
+type PublicUser = {
+  id: string
+  name: string
+  userType: 'PERSON' | 'COMPANY' | 'ADMIN'
+  avatarUrl: string | null
+}
 
 export type Collection = {
   id: string

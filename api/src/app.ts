@@ -6,6 +6,7 @@ import { categoriesRouter } from './modules/categories/categories.routes.js'
 import { meRouter } from './modules/me/me.routes.js'
 import { occurrencesRouter } from './modules/occurrences/occurrences.routes.js'
 import { statsRouter } from './modules/stats/stats.routes.js'
+import { usersRouter } from './modules/users/users.routes.js'
 import { healthRouter } from './routes/health.js'
 
 export function createApp() {
@@ -20,6 +21,7 @@ export function createApp() {
   app.use('/api/occurrences', occurrencesRouter)
   app.use('/api/me', meRouter)
   app.use('/api/stats', statsRouter)
+  app.use('/api/users', usersRouter)
 
   app.use('/api', (_req, res) => {
     res.status(404).json({ message: 'Rota não encontrada' })

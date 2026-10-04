@@ -4,7 +4,10 @@ import { AppError } from '../lib/errors.js'
 
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof AppError) {
-    res.status(err.statusCode).json({ message: err.message })
+    res.status(err.statusCode).json({
+      message: err.message,
+      ...(err.fieldErrors.length > 0 && { errors: err.fieldErrors }),
+    })
     return
   }
 
@@ -13,6 +16,12 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
       message: 'Dados inválidos',
       errors: err.issues.map((issue) => ({ field: issue.path.join('.'), message: issue.message })),
     })
+    return
+  }
+
+  // Corpo maior que o limite da rota (ex.: foto de perfil)
+  if (typeof err === 'object' && err !== null && 'type' in err && err.type === 'entity.too.large') {
+    res.status(413).json({ message: 'Arquivo muito grande' })
     return
   }
 

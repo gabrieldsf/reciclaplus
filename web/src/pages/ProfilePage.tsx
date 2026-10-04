@@ -1,4 +1,5 @@
 import { useAuth } from '../auth/AuthContext'
+import { AvatarPicker } from '../components/AvatarPicker'
 import { InstallAppButton } from '../components/InstallAppButton'
 
 const userTypeLabels = { PERSON: 'Pessoa', COMPANY: 'Empresa', ADMIN: 'Administrador' } as const
@@ -12,7 +13,10 @@ export function ProfilePage() {
   return (
     <section className="mx-auto max-w-md p-4 md:p-8">
       <h1 className="text-2xl font-bold">Perfil</h1>
-      <dl className="mt-6 flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+      <div className="mt-6">
+        <AvatarPicker />
+      </div>
+      <dl className="mt-4 flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
         <div>
           <dt className="text-sm text-brand-700">Nome</dt>
           <dd className="font-medium">{user.name}</dd>

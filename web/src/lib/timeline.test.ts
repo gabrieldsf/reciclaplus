@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { buildTimeline } from './timeline'
 import type { Collection, Occurrence } from './types'
 
-const owner = { id: 'u1', name: 'Maria', userType: 'PERSON' as const }
-const collector = { id: 'u2', name: 'João', userType: 'PERSON' as const }
+const owner = { id: 'u1', name: 'Maria', userType: 'PERSON' as const, avatarUrl: null }
+const collector = { id: 'u2', name: 'João', userType: 'PERSON' as const, avatarUrl: null }
 
 function occurrence(overrides: Partial<Occurrence> = {}): Occurrence {
   return {

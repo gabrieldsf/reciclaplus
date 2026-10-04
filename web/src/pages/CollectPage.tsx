@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
+import { UserAvatar } from '../components/UserAvatar'
 import { useCurrentPosition } from '../hooks/useCurrentPosition'
 import { api, ApiError } from '../lib/api'
 import { categoryStyle } from '../lib/categories'
@@ -8,8 +9,8 @@ import { formatDateTime } from '../lib/format'
 import { formatDistance, getLastLocation, sortByDistance } from '../lib/geo'
 import type { Occurrence } from '../lib/types'
 
-// Ocorrências disponíveis, da mais próxima para a mais distante, com "Coletar" em cada uma
-export function ListPage() {
+// Tela "Coletar": ocorrências disponíveis, da mais próxima para a mais distante
+export function CollectPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -55,7 +56,7 @@ export function ListPage() {
   return (
     <section className="mx-auto flex max-w-2xl flex-col gap-4 p-4 md:p-8">
       <header>
-        <h1 className="text-2xl font-bold">Ocorrências próximas</h1>
+        <h1 className="text-2xl font-bold">Coletar</h1>
         <p className="text-brand-700">
           {position
             ? 'Disponíveis para coleta, da mais próxima para a mais distante.'
@@ -152,9 +153,12 @@ export function ListPage() {
                           {occurrence.description}
                         </p>
                       )}
-                      <p className="mt-1 text-xs text-brand-700">
-                        {isOwner ? 'Informada por você' : `Informada por ${occurrence.user.name}`} ·{' '}
-                        {formatDateTime(occurrence.createdAt)}
+                      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-brand-700">
+                        <UserAvatar user={occurrence.user} size="xs" />
+                        <span>
+                          {isOwner ? 'Informada por você' : `Informada por ${occurrence.user.name}`}{' '}
+                          · {formatDateTime(occurrence.createdAt)}
+                        </span>
                       </p>
                     </div>
                   </div>

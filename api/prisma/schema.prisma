@@ -29,6 +29,13 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   userType     UserType @default(PERSON) @map("user_type")
+
+  // Foto de perfil: um avatar pronto (avatarPreset) OU uma foto enviada (avatarImage),
+  // nunca os dois. avatarUpdatedAt versiona a URL para o cache do navegador.
+  avatarPreset    String?   @map("avatar_preset")
+  avatarImage     Bytes?    @map("avatar_image")
+  avatarImageType String?   @map("avatar_image_type")
+  avatarUpdatedAt DateTime? @map("avatar_updated_at")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

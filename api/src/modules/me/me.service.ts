@@ -1,3 +1,4 @@
+import { withAvatarUrl } from '../../lib/avatars.js'
 import { prisma } from '../../lib/prisma.js'
 import {
   occurrenceBaseSelect,
@@ -20,7 +21,7 @@ export async function listMyOccurrences(userId: string) {
 
 // Coletas assumidas pelo usuário (em andamento, concluídas ou canceladas pelo dono)
 export async function listMyCollections(userId: string) {
-  return prisma.collection.findMany({
+  const collections = await prisma.collection.findMany({
     where: { collectorId: userId },
     orderBy: { acceptedAt: 'desc' },
     take: MAX_HISTORY_RESULTS,
@@ -34,4 +35,8 @@ export async function listMyCollections(userId: string) {
       occurrence: { select: occurrenceBaseSelect },
     },
   })
+  return collections.map(({ occurrence, ...collection }) => ({
+    ...collection,
+    occurrence: { ...occurrence, user: withAvatarUrl(occurrence.user) },
+  }))
 }

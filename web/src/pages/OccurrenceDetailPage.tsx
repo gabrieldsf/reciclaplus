@@ -8,6 +8,7 @@ import { CollectionPanel } from '../components/occurrences/CollectionPanel'
 import { StatusBadge } from '../components/occurrences/StatusBadge'
 import { Timeline } from '../components/occurrences/Timeline'
 import { PageHeader } from '../components/PageHeader'
+import { UserAvatar } from '../components/UserAvatar'
 import { useCurrentPosition } from '../hooks/useCurrentPosition'
 import { useOccurrence } from '../hooks/useOccurrence'
 import { api, ApiError } from '../lib/api'
@@ -153,10 +154,13 @@ export function OccurrenceDetailPage() {
             </div>
             <div>
               <dt className="text-brand-700">Informada por</dt>
-              <dd className="font-medium">
-                {isOwner ? 'Você' : occurrence.user.name}
-                <span className="block text-xs text-brand-700">
-                  {userTypeLabels[occurrence.user.userType]}
+              <dd className="flex items-center gap-2 font-medium">
+                <UserAvatar user={occurrence.user} size="sm" />
+                <span>
+                  {isOwner ? 'Você' : occurrence.user.name}
+                  <span className="block text-xs text-brand-700">
+                    {userTypeLabels[occurrence.user.userType]}
+                  </span>
                 </span>
               </dd>
             </div>

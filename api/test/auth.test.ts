@@ -2,6 +2,7 @@ import request from 'supertest'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { prisma } from '../src/lib/prisma.js'
 import { app, registerUser, resetDatabase } from './helpers.js'
+import { FAKE_DNS } from './setup.js'
 
 beforeEach(resetDatabase)
 
@@ -102,5 +103,31 @@ describe('GET /api/auth/me (rota protegida)', () => {
 
     expect(res.status).toBe(401)
     expect(res.body.message).toBe('Sessão inválida ou expirada')
+  })
+})
+
+describe('cadastro: o domínio do e-mail precisa receber mensagens', () => {
+  it('recusa domínio inexistente, apontando o campo e-mail', async () => {
+    const { res } = await registerUser({ email: `maria@${FAKE_DNS.missing}` })
+
+    expect(res.status).toBe(400)
+    expect(res.body.errors).toEqual([
+      {
+        field: 'email',
+        message: 'Este domínio de e-mail não existe ou não recebe mensagens. Confira o endereço.',
+      },
+    ])
+  })
+
+  it('recusa domínio que declara não receber e-mail (null MX)', async () => {
+    const { res } = await registerUser({ email: `maria@${FAKE_DNS.noMail}` })
+
+    expect(res.status).toBe(400)
+  })
+
+  it('não bloqueia o cadastro se o próprio DNS falhar', async () => {
+    const { res } = await registerUser({ email: `maria@${FAKE_DNS.broken}` })
+
+    expect(res.status).toBe(201)
   })
 })

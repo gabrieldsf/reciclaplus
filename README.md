@@ -59,6 +59,10 @@ o descartam ao final. Eles nunca acessam o banco da Neon.
 | GET    | `/api/me/occurrences`           | JWT  | Histórico: ocorrências que registrei                         |
 | GET    | `/api/me/collections`           | JWT  | Histórico: coletas que assumi                                |
 | GET    | `/api/stats`                    | —    | Painel público: totais, categorias, tempos médios, 8 semanas |
+| PUT    | `/api/me/avatar`                | JWT  | Escolhe avatar pronto `{ preset }`                           |
+| PUT    | `/api/me/avatar/photo`          | JWT  | Envia foto (JPEG/PNG/WebP, até 300 KB)                       |
+| DELETE | `/api/me/avatar`                | JWT  | Remove foto/avatar                                           |
+| GET    | `/api/users/:id/avatar`         | —    | Foto de perfil (cache por versão)                            |
 
 Rotas protegidas exigem o cabeçalho `Authorization: Bearer <token>`.
 

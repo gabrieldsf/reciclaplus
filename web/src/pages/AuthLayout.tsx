@@ -6,8 +6,9 @@ export function AuthLayout({ title, children }: { title: string; children: React
   return (
     <div className="flex min-h-dvh flex-col bg-brand-50 text-brand-900">
       <header className="px-4 py-3 md:px-8">
-        <Link to="/" className="text-xl font-bold">
-          ♻ Recicla+
+        <Link to="/" className="flex w-fit items-center gap-2 text-xl font-bold">
+          <img src="/logo.svg" alt="" className="size-9" />
+          Recicla+
         </Link>
       </header>
       <main className="flex flex-1 items-start justify-center px-4 pt-6 pb-10 md:items-center md:pt-0">

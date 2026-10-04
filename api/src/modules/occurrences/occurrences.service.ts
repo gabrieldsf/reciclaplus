@@ -1,4 +1,5 @@
 import type { Prisma } from '../../generated/prisma/client.js'
+import { avatarSelect, withAvatarUrl } from '../../lib/avatars.js'
 import { AppError } from '../../lib/errors.js'
 import { prisma } from '../../lib/prisma.js'
 import { statusesThatCanReach } from './occurrence-status.js'
@@ -7,6 +8,9 @@ import type {
   ListOccurrencesQuery,
   UpdateOccurrenceInput,
 } from './occurrences.schemas.js'
+
+// Dados públicos de uma pessoa (sem e-mail)
+const personSelect = { id: true, name: true, userType: true, ...avatarSelect } as const
 
 // Dados públicos da ocorrência (sem e-mail de quem registrou)
 export const occurrenceBaseSelect = {
@@ -21,7 +25,7 @@ export const occurrenceBaseSelect = {
   updatedAt: true,
   category: { select: { id: true, name: true } },
   subcategory: { select: { id: true, name: true } },
-  user: { select: { id: true, name: true, userType: true } },
+  user: { select: personSelect },
 } satisfies Prisma.OccurrenceSelect
 
 export const occurrenceSelect = {
@@ -37,7 +41,7 @@ export const occurrenceSelect = {
       cancelledAt: true,
       collectedQuantity: true,
       observation: true,
-      collector: { select: { id: true, name: true, userType: true } },
+      collector: { select: personSelect },
     },
   },
 } satisfies Prisma.OccurrenceSelect
@@ -46,7 +50,15 @@ type SelectedOccurrence = Prisma.OccurrenceGetPayload<{ select: typeof occurrenc
 
 // Formato devolvido pela API: a coleta mais recente vira `collection` (ou null)
 export function toOccurrenceResponse({ collections, ...occurrence }: SelectedOccurrence) {
-  return { ...occurrence, collection: collections[0] ?? null }
+  const collection = collections[0]
+  return {
+    ...occurrence,
+    // Pessoas aparecem com `avatarUrl` no lugar dos campos internos de avatar
+    user: withAvatarUrl(occurrence.user),
+    collection: collection
+      ? { ...collection, collector: withAvatarUrl(collection.collector) }
+      : null,
+  }
 }
 
 const MAX_LIST_RESULTS = 500

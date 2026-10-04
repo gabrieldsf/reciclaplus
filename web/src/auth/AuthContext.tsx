@@ -10,6 +10,8 @@ export type User = {
   email: string
   userType: UserType
   createdAt: string
+  // Foto enviada ou avatar escolhido; null mostra a inicial do nome
+  avatarUrl: string | null
 }
 
 export type RegisterData = {
@@ -31,6 +33,8 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>
   register: (data: RegisterData) => Promise<void>
   logout: () => void
+  // Atualiza os dados do usuário logado (ex.: depois de trocar o avatar)
+  updateUser: (user: User) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -80,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, loggedOut, login, register, logout }),
+    () => ({ user, loading, loggedOut, login, register, logout, updateUser: setUser }),
     [user, loading, loggedOut, login, register, logout],
   )
 

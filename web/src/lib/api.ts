@@ -22,18 +22,23 @@ export const tokenStorage = {
   clear: () => localStorage.removeItem(TOKEN_KEY),
 }
 
-export async function api<T>(path: string, options: { method?: string; body?: unknown } = {}) {
+// `body` é enviado como JSON; `file` (ex.: foto) é enviado como está, com o próprio tipo
+export async function api<T>(
+  path: string,
+  options: { method?: string; body?: unknown; file?: Blob } = {},
+) {
   const headers: Record<string, string> = {}
   const token = tokenStorage.get()
   if (token) headers['Authorization'] = `Bearer ${token}`
   if (options.body !== undefined) headers['Content-Type'] = 'application/json'
+  if (options.file) headers['Content-Type'] = options.file.type || 'application/octet-stream'
 
   let res: Response
   try {
     res = await fetch(`/api${path}`, {
       method: options.method ?? 'GET',
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: options.file ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
     })
   } catch {
     throw new ApiError(0, 'Não foi possível conectar ao servidor. Verifique sua conexão.')
