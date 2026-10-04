@@ -6,6 +6,7 @@ import { AppError } from '../../lib/errors.js'
 import { signToken } from '../../lib/jwt.js'
 import { prisma } from '../../lib/prisma.js'
 import type { LoginInput, RegisterInput } from './auth.schemas.js'
+import { sendVerificationCode } from './email-verification.service.js'
 
 const SALT_ROUNDS = 10
 
@@ -16,12 +17,16 @@ export const publicUserSelect = {
   email: true,
   userType: true,
   createdAt: true,
+  emailVerifiedAt: true,
   ...avatarSelect,
 } satisfies Prisma.UserSelect
 
 type SelectedUser = Prisma.UserGetPayload<{ select: typeof publicUserSelect }>
 
-export const toPublicUser = (user: SelectedUser) => withAvatarUrl(user)
+// Na resposta, a data de confirmação vira apenas "confirmou ou não"
+export function toPublicUser({ emailVerifiedAt, ...user }: SelectedUser) {
+  return { ...withAvatarUrl(user), emailVerified: emailVerifiedAt !== null }
+}
 
 const INVALID_DOMAIN =
   'Este domínio de e-mail não existe ou não recebe mensagens. Confira o endereço.'
@@ -39,6 +44,10 @@ export async function register(input: RegisterInput) {
       data: { name: input.name, email: input.email, passwordHash, userType: input.userType },
       select: publicUserSelect,
     })
+    // Falha no envio não desfaz o cadastro: a pessoa pode pedir o código de novo
+    await sendVerificationCode(user).catch((err) =>
+      console.error('Falha ao enviar código de confirmação:', err),
+    )
     return { user: toPublicUser(user), token: signToken(user.id) }
   } catch (err) {
     // Violação do índice único de e-mail (inclusive em cadastros simultâneos)

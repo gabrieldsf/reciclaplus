@@ -29,3 +29,10 @@ services:
       # URL do front na Vercel, ex.: https://reciclaplus.vercel.app
       - key: CORS_ORIGIN
         sync: false
+      # Envio do código de confirmação de e-mail (Brevo)
+      - key: BREVO_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_FROM_NAME
+        value: Recicla+

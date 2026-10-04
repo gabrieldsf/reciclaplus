@@ -13,6 +13,7 @@ import { MapPage } from './pages/MapPage'
 import { OccurrenceDetailPage } from './pages/OccurrenceDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
+import { VerifyEmailPage } from './pages/VerifyEmailPage'
 
 function App() {
   return (
@@ -22,6 +23,9 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/entrar" element={<LoginPage />} />
           <Route path="/cadastro" element={<RegisterPage />} />
+          <Route element={<RequireAuth />}>
+            <Route path="/confirmar-email" element={<VerifyEmailPage />} />
+          </Route>
 
           <Route element={<AppLayout />}>
             {/* O mapa é público; criar ocorrência e coletar exigem login */}

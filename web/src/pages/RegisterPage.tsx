@@ -34,7 +34,8 @@ export function RegisterPage() {
         password: String(form.get('password')),
         userType,
       })
-      navigate(redirectTo, { replace: true })
+      // Depois do cadastro, a pessoa confirma o e-mail com o código recebido
+      navigate('/confirmar-email', { replace: true, state: { from: redirectTo } })
     } catch (err) {
       if (err instanceof ApiError && err.fieldErrors.length > 0) {
         setFieldErrors(Object.fromEntries(err.fieldErrors.map((e) => [e.field, e.message])))

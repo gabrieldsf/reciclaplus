@@ -12,6 +12,8 @@ export type User = {
   createdAt: string
   // Foto enviada ou avatar escolhido; null mostra a inicial do nome
   avatarUrl: string | null
+  // Informar e coletar exigem o e-mail confirmado por código
+  emailVerified: boolean
 }
 
 export type RegisterData = {

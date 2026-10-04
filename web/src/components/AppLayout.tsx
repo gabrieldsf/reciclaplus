@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
 import { UserAvatar } from './UserAvatar'
+import { VerifyEmailLink } from './VerifyEmailLink'
 
 type NavItem = {
   to: string
@@ -76,6 +77,16 @@ export function AppLayout() {
           </Link>
         )}
       </header>
+
+      {user && !user.emailVerified && (
+        <div className="flex shrink-0 items-center justify-center gap-2 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
+          <span aria-hidden="true">✉️</span>
+          <span>
+            Confirme seu e-mail para informar e coletar.{' '}
+            <VerifyEmailLink className="font-semibold underline">Confirmar agora</VerifyEmailLink>
+          </span>
+        </div>
+      )}
 
       <main className="min-h-0 flex-1 overflow-y-auto">
         <Outlet />

@@ -48,6 +48,8 @@ o descartam ao final. Eles nunca acessam o banco da Neon.
 | POST   | `/api/auth/register`            | —    | Cadastro (pessoa ou empresa) → `token`                       |
 | POST   | `/api/auth/login`               | —    | Login → `token`                                              |
 | GET    | `/api/auth/me`                  | JWT  | Usuário autenticado                                          |
+| POST   | `/api/auth/verify-email`        | JWT  | Confirma o e-mail com o código `{ code }`                    |
+| POST   | `/api/auth/verify-email/resend` | JWT  | Reenvia o código (1 por minuto)                              |
 | GET    | `/api/categories`               | —    | Categorias com subcategorias                                 |
 | GET    | `/api/occurrences`              | —    | Lista (filtros abaixo)                                       |
 | POST   | `/api/occurrences`              | JWT  | Cria ocorrência (status AVAILABLE)                           |
@@ -64,7 +66,8 @@ o descartam ao final. Eles nunca acessam o banco da Neon.
 | DELETE | `/api/me/avatar`                | JWT  | Remove foto/avatar                                           |
 | GET    | `/api/users/:id/avatar`         | —    | Foto de perfil (cache por versão)                            |
 
-Rotas protegidas exigem o cabeçalho `Authorization: Bearer <token>`.
+Rotas protegidas exigem o cabeçalho `Authorization: Bearer <token>`. Criar ocorrência, assumir e
+finalizar coleta exigem também o e-mail confirmado (senão: 403 `EMAIL_NOT_VERIFIED`).
 
 Filtros de `GET /api/occurrences`: `categoryId=1,2` e `status=AVAILABLE,IN_COLLECTION`
 (padrão: `AVAILABLE`).

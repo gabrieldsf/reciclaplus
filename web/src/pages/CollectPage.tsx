@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
 import { UserAvatar } from '../components/UserAvatar'
+import { VerifyEmailLink } from '../components/VerifyEmailLink'
 import { useCurrentPosition } from '../hooks/useCurrentPosition'
 import { api, ApiError } from '../lib/api'
 import { categoryStyle } from '../lib/categories'
@@ -174,6 +175,10 @@ export function CollectPage() {
                       <span className="flex flex-1 items-center justify-center rounded-xl bg-brand-50 px-4 py-2 text-sm text-brand-700">
                         Sua ocorrência
                       </span>
+                    ) : user && !user.emailVerified ? (
+                      <VerifyEmailLink className="flex-1 rounded-xl bg-brand-700 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-brand-900">
+                        Confirme o e-mail para coletar
+                      </VerifyEmailLink>
                     ) : user ? (
                       <button
                         type="button"

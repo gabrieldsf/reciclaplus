@@ -42,7 +42,12 @@ export async function createOccurrence(token: string, overrides: Record<string, 
 
 let counter = 0
 
-export async function registerUser(overrides: Partial<Record<string, string>> = {}) {
+// Cadastra um usuário. Por padrão já com o e-mail confirmado, para os testes que não
+// tratam da confirmação poderem informar e coletar; use { verified: false } para testá-la.
+export async function registerUser(
+  overrides: Partial<Record<string, string>> = {},
+  { verified = true }: { verified?: boolean } = {},
+) {
   counter += 1
   const body = {
     name: `Usuário ${counter}`,
@@ -51,5 +56,11 @@ export async function registerUser(overrides: Partial<Record<string, string>> = 
     ...overrides,
   }
   const res = await request(app).post('/api/auth/register').send(body)
+  if (verified && res.status === 201) {
+    await prisma.user.update({
+      where: { id: res.body.user.id },
+      data: { emailVerifiedAt: new Date() },
+    })
+  }
   return { res, body, token: res.body.token as string }
 }

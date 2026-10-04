@@ -4,6 +4,8 @@ import { setMxResolver } from '../src/lib/email-domain.js'
 // Precisa rodar antes de qualquer import de src/lib/prisma.ts
 process.env['DATABASE_URL'] = inject('databaseUrl')
 process.env['JWT_SECRET'] = 'test-secret'
+// E-mails ficam numa caixa de saída em memória (nada é enviado de verdade)
+process.env['EMAIL_TRANSPORT'] = 'memory'
 
 // DNS falso e previsível: os testes não dependem da internet
 export const FAKE_DNS = {

@@ -6,6 +6,7 @@ import { api, ApiError } from '../../lib/api'
 import { formatDateTime } from '../../lib/format'
 import type { Occurrence } from '../../lib/types'
 import { TextField } from '../TextField'
+import { VerifyEmailLink } from '../VerifyEmailLink'
 
 type CollectionPanelProps = {
   occurrence: Occurrence
@@ -68,6 +69,12 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
   if (status === 'AVAILABLE') {
     if (isOwner) {
       content = <Note>Aguardando alguém assumir a coleta.</Note>
+    } else if (user && !user.emailVerified) {
+      content = (
+        <VerifyEmailLink className={`${primaryButton} block text-center`}>
+          Confirme seu e-mail para coletar
+        </VerifyEmailLink>
+      )
     } else if (user) {
       content = (
         <button type="button" onClick={handleClaim} disabled={busy} className={primaryButton}>

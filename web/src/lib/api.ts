@@ -7,12 +7,15 @@ export type FieldError = { field: string; message: string }
 export class ApiError extends Error {
   readonly status: number
   readonly fieldErrors: FieldError[]
+  // Identificador estável vindo da API (ex.: EMAIL_NOT_VERIFIED)
+  readonly code: string | undefined
 
-  constructor(status: number, message: string, fieldErrors: FieldError[] = []) {
+  constructor(status: number, message: string, fieldErrors: FieldError[] = [], code?: string) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.fieldErrors = fieldErrors
+    this.code = code
   }
 }
 
@@ -46,7 +49,7 @@ export async function api<T>(
 
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    throw new ApiError(res.status, data.message ?? 'Erro inesperado', data.errors ?? [])
+    throw new ApiError(res.status, data.message ?? 'Erro inesperado', data.errors ?? [], data.code)
   }
   return data as T
 }

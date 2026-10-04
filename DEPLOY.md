@@ -23,6 +23,9 @@ Usuário ──HTTPS──► Vercel (front + PWA) ──/api/*──► Render 
    - `DIRECT_URL`: string da Neon **sem** pooling
    - `CORS_ORIGIN`: URL do front na Vercel (pode preencher depois do passo 2)
    - `JWT_SECRET` é gerado automaticamente.
+   - `BREVO_API_KEY` e `EMAIL_FROM`: chave da API da Brevo e o remetente verificado nela
+     (envio do código de confirmação de e-mail). Na Brevo, desative **Security → Authorized IPs**,
+     senão os envios a partir do Render são bloqueados.
 3. Aguarde o deploy e teste: `https://reciclaplus-api.onrender.com/api/health` →
    `{"status":"ok","database":"ok"}`.
 
