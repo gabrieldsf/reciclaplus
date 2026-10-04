@@ -14,3 +14,9 @@ export const completeCollectionSchema = z.object({
 })
 
 export type CompleteCollectionInput = z.infer<typeof completeCollectionSchema>
+
+// Posição atual do coletor: ?lat=-25.43&lng=-49.27
+export const routeQuerySchema = z.object({
+  lat: z.coerce.number<string>().min(-90).max(90),
+  lng: z.coerce.number<string>().min(-180).max(180),
+})

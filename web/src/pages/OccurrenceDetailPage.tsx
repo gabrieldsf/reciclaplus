@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext'
 import { BaseMap } from '../components/map/BaseMap'
 import { categoryIcon } from '../components/map/markers'
 import { CollectionPanel } from '../components/occurrences/CollectionPanel'
+import { CollectorRoute } from '../components/occurrences/CollectorRoute'
 import { StatusBadge } from '../components/occurrences/StatusBadge'
 import { Timeline } from '../components/occurrences/Timeline'
 import { PageHeader } from '../components/PageHeader'
@@ -174,6 +175,12 @@ export function OccurrenceDetailPage() {
           )}
 
           <CollectionPanel occurrence={occurrence} user={user} onChange={replace} />
+
+          {/* Rota só para quem assumiu a coleta em andamento */}
+          {occurrence.status === 'IN_COLLECTION' &&
+            occurrence.collection?.collector.id === user?.id && (
+              <CollectorRoute occurrence={occurrence} />
+            )}
 
           <Timeline occurrence={occurrence} viewerId={user?.id} />
 

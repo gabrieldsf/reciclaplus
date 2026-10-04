@@ -1,5 +1,6 @@
 import { AppError } from '../../lib/errors.js'
 import { prisma } from '../../lib/prisma.js'
+import { walkingRoute, type Point } from '../../lib/routing.js'
 import { statusesThatCanReach } from '../occurrences/occurrence-status.js'
 import { getOccurrence } from '../occurrences/occurrences.service.js'
 import type { CompleteCollectionInput } from './collections.schemas.js'
@@ -67,4 +68,30 @@ export async function completeCollection(
     throw new AppError(409, 'Não há coleta em andamento para esta ocorrência')
   }
   return getOccurrence(occurrenceId)
+}
+
+// Caminho do coletor até o material (só para quem assumiu a coleta em andamento,
+// para que a cota do serviço de rotas não seja usada por qualquer pessoa)
+export async function routeToOccurrence(occurrenceId: string, userId: string, from: Point) {
+  const occurrence = await prisma.occurrence.findUnique({
+    where: { id: occurrenceId },
+    select: {
+      status: true,
+      latitude: true,
+      longitude: true,
+      collections: {
+        where: { completedAt: null, cancelledAt: null },
+        select: { collectorId: true },
+        take: 1,
+      },
+    },
+  })
+  if (!occurrence) throw new AppError(404, 'Ocorrência não encontrada')
+  if (occurrence.status !== 'IN_COLLECTION') {
+    throw new AppError(409, 'A rota só existe durante a coleta')
+  }
+  if (occurrence.collections[0]?.collectorId !== userId) {
+    throw new AppError(403, 'Somente quem assumiu a coleta pode ver a rota')
+  }
+  return walkingRoute(from, { latitude: occurrence.latitude, longitude: occurrence.longitude })
 }

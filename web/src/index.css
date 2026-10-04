@@ -33,3 +33,82 @@
 .leaflet-container {
   font-family: inherit;
 }
+
+/* Come-come do coletor (personagem próprio do Recicla+): duas metades que abrem e
+   fecham a boca; a boca aponta para a direita e o ícone gira na direção do caminho */
+.comecome {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35));
+}
+
+.comecome-half {
+  position: absolute;
+  left: 0;
+  width: 34px;
+  height: 17px;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+  animation: comecome-top 0.35s ease-in-out infinite alternate;
+}
+
+.comecome-half.top {
+  top: 0;
+  border-bottom: 0;
+  border-radius: 17px 17px 0 0;
+  transform-origin: 50% 100%;
+}
+
+.comecome-half.bottom {
+  top: 17px;
+  border-top: 0;
+  border-radius: 0 0 17px 17px;
+  transform-origin: 50% 0;
+  animation-name: comecome-bottom;
+}
+
+.comecome-eye {
+  position: absolute;
+  top: 5px;
+  left: 17px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #1f2937;
+}
+
+.comecome-leaf {
+  position: absolute;
+  top: -7px;
+  left: 9px;
+  width: 9px;
+  height: 12px;
+  border-radius: 0 100% 0 100%;
+  background: #15803d;
+  transform: rotate(-20deg);
+}
+
+@keyframes comecome-top {
+  to {
+    transform: rotate(-32deg);
+  }
+}
+
+@keyframes comecome-bottom {
+  to {
+    transform: rotate(32deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comecome-half {
+    animation: none;
+  }
+  .comecome-half.top {
+    transform: rotate(-20deg);
+  }
+  .comecome-half.bottom {
+    transform: rotate(20deg);
+  }
+}

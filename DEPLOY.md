@@ -26,6 +26,8 @@ Usuário ──HTTPS──► Vercel (front + PWA) ──/api/*──► Render 
    - `BREVO_API_KEY` e `EMAIL_FROM`: chave da API da Brevo e o remetente verificado nela
      (envio do código de confirmação de e-mail). Na Brevo, desative **Security → Authorized IPs**,
      senão os envios a partir do Render são bloqueados.
+   - `ORS_API_KEY` (opcional): chave do OpenRouteService para o caminho do coletor seguir as ruas;
+     sem ela, o caminho aparece em linha reta.
 3. Aguarde o deploy e teste: `https://reciclaplus-api.onrender.com/api/health` →
    `{"status":"ok","database":"ok"}`.
 

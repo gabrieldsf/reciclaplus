@@ -36,3 +36,6 @@ services:
         sync: false
       - key: EMAIL_FROM_NAME
         value: Recicla+
+      # Caminho do coletor pelas ruas (OpenRouteService); sem ela, linha reta
+      - key: ORS_API_KEY
+        sync: false

@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { AppError } from '../../lib/errors.js'
 import { requireAuth } from '../../middlewares/require-auth.js'
 import { requireVerifiedEmail } from '../../middlewares/require-verified-email.js'
-import { completeCollectionSchema } from '../collections/collections.schemas.js'
+import { completeCollectionSchema, routeQuerySchema } from '../collections/collections.schemas.js'
 import * as collectionsService from '../collections/collections.service.js'
 import {
   createOccurrenceSchema,
@@ -58,5 +58,17 @@ occurrencesRouter.post('/:id/complete', requireAuth, requireVerifiedEmail, async
   const input = completeCollectionSchema.parse(req.body ?? {})
   res.json({
     occurrence: await collectionsService.completeCollection(id, req.userId!, input),
+  })
+})
+
+// Rota a pé da posição do coletor até o material
+occurrencesRouter.get('/:id/route', requireAuth, async (req, res) => {
+  const id = parseId(req.params.id)
+  const { lat, lng } = routeQuerySchema.parse(req.query)
+  res.json({
+    route: await collectionsService.routeToOccurrence(id, req.userId!, {
+      latitude: lat,
+      longitude: lng,
+    }),
   })
 })
