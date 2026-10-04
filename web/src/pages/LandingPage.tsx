@@ -110,13 +110,13 @@ export function LandingPage() {
           <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 pt-6 pb-12 md:grid-cols-2 md:px-8 md:pt-12 md:pb-20">
             <div className="flex flex-col gap-5 text-center md:text-left">
               <span className="mx-auto w-fit rounded-full bg-white px-3 py-1 text-sm font-semibold text-brand-700 shadow-sm md:mx-0">
-                ♻️ Reciclagem e doação perto de você
+                ♻️ Reciclagem perto de você
               </span>
               <h1 className="text-4xl leading-[1.1] font-extrabold tracking-tight text-balance md:text-6xl">
                 Encontre, compartilhe e <span className="text-brand-500">recicle</span>
               </h1>
               <p className="mx-auto max-w-md text-lg text-pretty text-brand-700 md:mx-0">
-                Conectamos quem tem materiais recicláveis ou itens para doar a quem pode coletá-los.
+                Conectamos quem tem materiais recicláveis a quem pode coletá-los.
               </p>
               <div className="mx-auto flex w-full max-w-sm flex-col gap-3 sm:flex-row md:mx-0">
                 <Link

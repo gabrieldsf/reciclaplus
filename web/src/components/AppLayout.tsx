@@ -83,7 +83,8 @@ export function AppLayout() {
 
       <nav
         aria-label="Navegação principal"
-        className="grid shrink-0 grid-cols-5 items-end border-t border-brand-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
+        // relative z-10: o botão ➕ "sobe" sobre o conteúdo; sem isso, o mapa (posicionado) o cobre
+        className="relative z-10 grid shrink-0 grid-cols-5 items-end border-t border-brand-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         {navItems.map((item) =>
           item.variant === 'primary' ? (
