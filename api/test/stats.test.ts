@@ -30,7 +30,7 @@ describe('GET /api/stats', () => {
     })
     expect(res.body.collectionRate).toBeNull()
     expect(res.body.averageHours).toEqual({ untilClaimed: null, untilCollected: null })
-    expect(res.body.byCategory).toHaveLength(6)
+    expect(res.body.byCategory).toHaveLength(7)
     expect(res.body.weekly).toHaveLength(8)
     expect(res.body.weekly.every((w: { registered: number }) => w.registered === 0)).toBe(true)
   })

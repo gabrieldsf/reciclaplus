@@ -55,3 +55,14 @@ export function formatDistance(km: number) {
   if (km < 10) return `${km.toFixed(1).replace('.', ',')} km`
   return `${Math.round(km)} km`
 }
+
+// Ordena da mais próxima para a mais distante; sem posição, mantém a ordem recebida
+export function sortByDistance<T extends LatLng>(
+  items: T[],
+  from: LatLng | null,
+): { item: T; distance: number | null }[] {
+  if (!from) return items.map((item) => ({ item, distance: null }))
+  return items
+    .map((item) => ({ item, distance: distanceKm(from, item) }))
+    .sort((a, b) => a.distance - b.distance)
+}

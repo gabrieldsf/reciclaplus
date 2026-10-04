@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { distanceKm, formatDistance } from './geo'
+import { distanceKm, formatDistance, sortByDistance } from './geo'
 
 describe('distanceKm', () => {
   it('é zero para o mesmo ponto', () => {
@@ -30,5 +30,24 @@ describe('formatDistance', () => {
     [12.6, '13 km'],
   ])('%s km → %s', (km, expected) => {
     expect(formatDistance(km)).toBe(expected)
+  })
+})
+
+describe('sortByDistance', () => {
+  const here = { latitude: -25.4284, longitude: -49.2733 }
+  const near = { id: 'perto', latitude: -25.429, longitude: -49.274 }
+  const mid = { id: 'meio', latitude: -25.44, longitude: -49.28 }
+  const far = { id: 'longe', latitude: -23.55, longitude: -46.63 }
+
+  it('ordena da mais próxima para a mais distante, com a distância', () => {
+    const sorted = sortByDistance([far, near, mid], here)
+    expect(sorted.map((s) => s.item.id)).toEqual(['perto', 'meio', 'longe'])
+    expect(sorted[0]!.distance).toBeLessThan(0.2)
+  })
+
+  it('sem posição, mantém a ordem original e não informa distância', () => {
+    const sorted = sortByDistance([far, near], null)
+    expect(sorted.map((s) => s.item.id)).toEqual(['longe', 'perto'])
+    expect(sorted.every((s) => s.distance === null)).toBe(true)
   })
 })

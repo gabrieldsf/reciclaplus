@@ -7,6 +7,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { EditOccurrencePage } from './pages/EditOccurrencePage'
 import { HistoryPage } from './pages/HistoryPage'
 import { LandingPage } from './pages/LandingPage'
+import { ListPage } from './pages/ListPage'
 import { LoginPage } from './pages/LoginPage'
 import { MapPage } from './pages/MapPage'
 import { OccurrenceDetailPage } from './pages/OccurrenceDetailPage'
@@ -26,6 +27,7 @@ function App() {
             {/* O mapa é público; criar ocorrência e coletar exigem login */}
             <Route path="/mapa" element={<MapPage />} />
             <Route path="/painel" element={<DashboardPage />} />
+            <Route path="/lista" element={<ListPage />} />
             <Route path="/ocorrencias/:id" element={<OccurrenceDetailPage />} />
             <Route element={<RequireAuth />}>
               <Route path="/informar" element={<CreateOccurrencePage />} />

@@ -5,8 +5,8 @@ const navItems = [
   { to: '/mapa', label: 'Mapa', icon: '🗺️' },
   { to: '/painel', label: 'Painel', icon: '📊' },
   { to: '/informar', label: 'Informar', icon: '➕' },
+  { to: '/lista', label: 'Lista', icon: '📋' },
   { to: '/historico', label: 'Histórico', icon: '🕘' },
-  { to: '/perfil', label: 'Perfil', icon: '👤' },
 ]
 
 // Mobile: navegação na barra inferior. Desktop: navegação no topo.
@@ -33,7 +33,19 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        {!user && (
+        {/* Perfil no canto superior direito (celular e desktop) */}
+        {user ? (
+          <NavLink
+            to="/perfil"
+            aria-label="Perfil"
+            title={user.name}
+            className={({ isActive }) =>
+              `grid size-10 shrink-0 place-items-center rounded-full text-lg font-bold text-white md:ml-2 ${isActive ? 'bg-brand-900 ring-2 ring-brand-500 ring-offset-2' : 'bg-brand-700 hover:bg-brand-900'}`
+            }
+          >
+            <span aria-hidden="true">{user.name.trim().charAt(0).toUpperCase()}</span>
+          </NavLink>
+        ) : (
           <Link
             to="/entrar"
             className="rounded-lg px-3 py-2 font-medium hover:bg-brand-100 md:ml-2"

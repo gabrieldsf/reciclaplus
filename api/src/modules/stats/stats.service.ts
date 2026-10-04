@@ -15,7 +15,10 @@ export async function getPlatformStats() {
     await Promise.all([
       prisma.occurrence.groupBy({ by: ['status'], _count: { _all: true } }),
       prisma.occurrence.groupBy({ by: ['categoryId', 'status'], _count: { _all: true } }),
-      prisma.category.findMany({ orderBy: { id: 'asc' }, select: { id: true, name: true } }),
+      prisma.category.findMany({
+        orderBy: [{ displayOrder: 'asc' }, { id: 'asc' }],
+        select: { id: true, name: true },
+      }),
       prisma.user.groupBy({
         by: ['userType'],
         where: { userType: { not: 'ADMIN' } },

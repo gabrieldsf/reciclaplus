@@ -5,7 +5,7 @@ export const categoriesRouter = Router()
 
 categoriesRouter.get('/', async (_req, res) => {
   const categories = await prisma.category.findMany({
-    orderBy: { id: 'asc' },
+    orderBy: [{ displayOrder: 'asc' }, { id: 'asc' }],
     select: {
       id: true,
       name: true,

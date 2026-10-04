@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { app } from './helpers.js'
 
 describe('GET /api/categories', () => {
-  it('lista as 6 categorias do MVP com suas subcategorias', async () => {
+  it('lista as categorias na ordem de exibição, com "Outros" por último', async () => {
     const res = await request(app).get('/api/categories')
 
     expect(res.status).toBe(200)
@@ -13,6 +13,7 @@ describe('GET /api/categories', () => {
       'Metal',
       'Vidro',
       'Eletrônicos',
+      'Doação',
       'Outros',
     ])
 
@@ -21,6 +22,23 @@ describe('GET /api/categories', () => {
       'Garrafas PET',
       'Embalagens',
       'Plástico rígido',
+      'Outros',
+    ])
+  })
+})
+
+describe('categoria Doação', () => {
+  it('tem subcategorias para itens reaproveitáveis', async () => {
+    const res = await request(app).get('/api/categories')
+    const doacao = res.body.categories.find((c: { name: string }) => c.name === 'Doação')
+
+    expect(doacao.subcategories.map((s: { name: string }) => s.name)).toEqual([
+      'Móveis',
+      'Roupas',
+      'Calçados',
+      'Eletrodomésticos',
+      'Brinquedos',
+      'Livros',
       'Outros',
     ])
   })

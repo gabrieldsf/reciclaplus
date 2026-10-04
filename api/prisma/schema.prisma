@@ -42,6 +42,8 @@ model Category {
   id          Int     @id @default(autoincrement())
   name        String  @unique
   description String?
+  // Ordem nas listas e filtros ("Outros" sempre por último)
+  displayOrder Int    @default(0) @map("display_order")
 
   subcategories Subcategory[]
   occurrences   Occurrence[]

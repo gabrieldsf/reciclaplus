@@ -8,6 +8,7 @@ const styles: Record<string, CategoryStyle> = {
   Metal: { color: '#ca8a04', emoji: '🥫' },
   Vidro: { color: '#16a34a', emoji: '🍾' },
   Eletrônicos: { color: '#7c3aed', emoji: '💻' },
+  Doação: { color: '#0d9488', emoji: '🎁' },
 }
 
 const fallback: CategoryStyle = { color: '#57534e', emoji: '♻️' }

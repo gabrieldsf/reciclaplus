@@ -1,4 +1,4 @@
-// Categorias e subcategorias iniciais (Plano de Projeto, seção 5)
+// Categorias e subcategorias (Plano de Projeto, seção 5, + "Doação")
 import 'dotenv/config'
 import { prisma } from '../src/lib/prisma.js'
 
@@ -25,6 +25,19 @@ const categories: { name: string; description: string; subcategories: string[] }
     subcategories: ['Celulares', 'Computadores', 'Componentes', 'Outros'],
   },
   {
+    name: 'Doação',
+    description: 'Itens em bom estado para reaproveitamento',
+    subcategories: [
+      'Móveis',
+      'Roupas',
+      'Calçados',
+      'Eletrodomésticos',
+      'Brinquedos',
+      'Livros',
+      'Outros',
+    ],
+  },
+  {
     name: 'Outros',
     description: 'Materiais que não se enquadram nas categorias principais',
     subcategories: [],
@@ -32,11 +45,13 @@ const categories: { name: string; description: string; subcategories: string[] }
 ]
 
 async function main() {
-  for (const { name, description, subcategories } of categories) {
+  // A posição na lista define a ordem de exibição
+  for (const [index, { name, description, subcategories }] of categories.entries()) {
+    const displayOrder = index + 1
     const category = await prisma.category.upsert({
       where: { name },
-      update: { description },
-      create: { name, description },
+      update: { description, displayOrder },
+      create: { name, description, displayOrder },
     })
     for (const sub of subcategories) {
       await prisma.subcategory.upsert({
