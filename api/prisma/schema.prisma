@@ -38,12 +38,13 @@ model User {
   avatarUpdatedAt DateTime? @map("avatar_updated_at")
   // Preenchido quando a pessoa digita o código recebido por e-mail
   emailVerifiedAt DateTime? @map("email_verified_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   occurrences       Occurrence[]
   collections       Collection[]
   emailVerification EmailVerification?
+  photos            Photo[]
 
   @@map("users")
 }
@@ -63,11 +64,11 @@ model EmailVerification {
 }
 
 model Category {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
-  description String?
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  description  String?
   // Ordem nas listas e filtros ("Outros" sempre por último)
-  displayOrder Int    @default(0) @map("display_order")
+  displayOrder Int     @default(0) @map("display_order")
 
   subcategories Subcategory[]
   occurrences   Occurrence[]
@@ -96,7 +97,10 @@ model Occurrence {
   estimatedQuantity String?          @map("estimated_quantity")
   latitude          Float
   longitude         Float
-  photoUrl          String?          @map("photo_url")
+  // Coluna antiga (nunca usada); será removida quando nenhuma versão no ar a ler
+  legacyPhotoUrl    String?          @map("photo_url")
+  // Foto do material, enviada ao informar (opcional)
+  photoId           String?          @unique @map("photo_id") @db.Uuid
   status            OccurrenceStatus @default(AVAILABLE)
   createdAt         DateTime         @default(now()) @map("created_at")
   updatedAt         DateTime         @updatedAt @map("updated_at")
@@ -104,6 +108,7 @@ model Occurrence {
   user        User         @relation(fields: [userId], references: [id])
   category    Category     @relation(fields: [categoryId], references: [id])
   subcategory Subcategory? @relation(fields: [subcategoryId], references: [id])
+  photo       Photo?       @relation("OccurrencePhoto", fields: [photoId], references: [id], onDelete: SetNull)
   collections Collection[]
 
   @@index([status, categoryId])
@@ -120,11 +125,33 @@ model Collection {
   // Preenchido quando o dono cancela a ocorrência durante a coleta
   cancelledAt       DateTime? @map("cancelled_at")
   observation       String?
+  // Foto do material coletado, enviada ao finalizar (opcional)
+  photoId           String?   @unique @map("photo_id") @db.Uuid
 
   occurrence Occurrence @relation(fields: [occurrenceId], references: [id])
   collector  User       @relation(fields: [collectorId], references: [id])
+  photo      Photo?     @relation("CollectionPhoto", fields: [photoId], references: [id], onDelete: SetNull)
 
   @@index([occurrenceId])
   @@index([collectorId])
   @@map("collections")
+}
+
+// Foto enviada pelo app (já reduzida no celular). Fica numa tabela própria para que as
+// listagens não carreguem os bytes e para facilitar mover as fotos para um serviço de
+// arquivos no futuro.
+model Photo {
+  id          String   @id @default(uuid()) @db.Uuid
+  uploadedBy  String   @map("uploaded_by") @db.Uuid
+  data        Bytes
+  contentType String   @map("content_type")
+  sizeBytes   Int      @map("size_bytes")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  uploader   User        @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+  occurrence Occurrence? @relation("OccurrencePhoto")
+  collection Collection? @relation("CollectionPhoto")
+
+  @@index([uploadedBy, createdAt])
+  @@map("photos")
 }

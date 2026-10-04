@@ -25,6 +25,8 @@ export type Collection = {
   cancelledAt: string | null
   collectedQuantity: string | null
   observation: string | null
+  // Foto do material coletado (opcional)
+  photoUrl: string | null
   collector: PublicUser
 }
 
@@ -69,4 +71,8 @@ export type OccurrenceInput = {
   subcategoryId: number | null
   estimatedQuantity: string
   description: string
+  photoId: string | null
 } & LatLng
+
+// Foto já enviada (POST /api/photos)
+export type UploadedPhoto = { id: string; url: string }

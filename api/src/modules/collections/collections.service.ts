@@ -3,6 +3,7 @@ import { prisma } from '../../lib/prisma.js'
 import { walkingRoute, type Point } from '../../lib/routing.js'
 import { statusesThatCanReach } from '../occurrences/occurrence-status.js'
 import { getOccurrence } from '../occurrences/occurrences.service.js'
+import { assertUsablePhoto } from '../photos/photos.service.js'
 import type { CompleteCollectionInput } from './collections.schemas.js'
 
 // Regra do projeto: cada pessoa pode ter no máximo 3 coletas em andamento, para que
@@ -55,6 +56,9 @@ export async function completeCollection(
   userId: string,
   input: CompleteCollectionInput,
 ) {
+  // A foto (se enviada) precisa ser da própria pessoa e ainda não usada
+  if (input.photoId) await assertUsablePhoto(input.photoId, userId)
+
   const completed = await prisma.$transaction(async (tx) => {
     const collection = await tx.collection.findFirst({
       where: { occurrenceId, completedAt: null, cancelledAt: null },

@@ -17,6 +17,8 @@ const occurrenceFields = {
   estimatedQuantity: optionalText(50),
   latitude: z.number({ error: 'Localização é obrigatória' }).min(-90).max(90),
   longitude: z.number({ error: 'Localização é obrigatória' }).min(-180).max(180),
+  // Foto já enviada em POST /api/photos (opcional; null remove numa edição)
+  photoId: z.uuid('Foto inválida').nullish(),
 }
 
 // RN02: categoria e localização são obrigatórias

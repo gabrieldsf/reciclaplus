@@ -4,7 +4,8 @@ import { Link, useLocation } from 'react-router'
 import type { User } from '../../auth/AuthContext'
 import { api, ApiError } from '../../lib/api'
 import { formatDateTime } from '../../lib/format'
-import type { Occurrence } from '../../lib/types'
+import type { Occurrence, UploadedPhoto } from '../../lib/types'
+import { PhotoField } from '../PhotoField'
 import { TextField } from '../TextField'
 import { VerifyEmailLink } from '../VerifyEmailLink'
 
@@ -22,6 +23,9 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
   const location = useLocation()
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  // Foto opcional do material coletado (enviada antes de confirmar)
+  const [photo, setPhoto] = useState<UploadedPhoto | null>(null)
+  const [photoUploading, setPhotoUploading] = useState(false)
 
   const { status, collection } = occurrence
   const isOwner = user?.id === occurrence.user.id
@@ -61,6 +65,7 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
     void run('complete', {
       collectedQuantity: String(form.get('collectedQuantity') ?? ''),
       observation: String(form.get('observation') ?? ''),
+      photoId: photo?.id ?? null,
     })
   }
 
@@ -111,7 +116,13 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
               defaultValue={occurrence.estimatedQuantity ?? ''}
             />
             <TextField label="Observação" name="observation" maxLength={500} />
-            <button type="submit" disabled={busy} className={primaryButton}>
+            <PhotoField
+              label="Foto da coleta"
+              value={photo}
+              onChange={setPhoto}
+              onBusyChange={setPhotoUploading}
+            />
+            <button type="submit" disabled={busy || photoUploading} className={primaryButton}>
               {busy ? 'Confirmando…' : 'Confirmar coleta'}
             </button>
           </form>
@@ -126,6 +137,20 @@ export function CollectionPanel({ occurrence, user, onChange }: CollectionPanelP
         Coletado por <strong>{collectorName}</strong> em {formatDateTime(collection.completedAt)}.
         {collection.collectedQuantity && <> Quantidade: {collection.collectedQuantity}.</>}
         {collection.observation && <span className="mt-1 block">“{collection.observation}”</span>}
+        {collection.photoUrl && (
+          <a
+            href={collection.photoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 block w-fit"
+          >
+            <img
+              src={collection.photoUrl}
+              alt="Foto do material coletado"
+              className="max-h-48 rounded-lg object-cover ring-1 ring-blue-200"
+            />
+          </a>
+        )}
       </Note>
     )
   }

@@ -9,6 +9,8 @@ const optionalText = (max: number) =>
     .transform((value) => value || null)
 
 export const completeCollectionSchema = z.object({
+  // Foto do material coletado, já enviada em POST /api/photos (opcional)
+  photoId: z.uuid('Foto inválida').nullish(),
   collectedQuantity: optionalText(50),
   observation: optionalText(500),
 })

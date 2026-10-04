@@ -1,10 +1,11 @@
-import { withAvatarUrl } from '../../lib/avatars.js'
 import { prisma } from '../../lib/prisma.js'
 import {
   occurrenceBaseSelect,
   occurrenceSelect,
+  toBaseOccurrenceResponse,
   toOccurrenceResponse,
 } from '../occurrences/occurrences.service.js'
+import { photoUrl } from '../photos/photos.service.js'
 
 const MAX_HISTORY_RESULTS = 200
 
@@ -33,11 +34,13 @@ export async function listMyCollections(userId: string, { active = false } = {})
       cancelledAt: true,
       collectedQuantity: true,
       observation: true,
+      photoId: true,
       occurrence: { select: occurrenceBaseSelect },
     },
   })
-  return collections.map(({ occurrence, ...collection }) => ({
+  return collections.map(({ occurrence, photoId, ...collection }) => ({
     ...collection,
-    occurrence: { ...occurrence, user: withAvatarUrl(occurrence.user) },
+    photoUrl: photoUrl(photoId),
+    occurrence: toBaseOccurrenceResponse(occurrence),
   }))
 }

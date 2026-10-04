@@ -32,6 +32,7 @@ function collection(overrides: Partial<Collection> = {}): Collection {
     cancelledAt: null,
     collectedQuantity: null,
     observation: null,
+    photoUrl: null,
     collector,
     ...overrides,
   }

@@ -44,6 +44,10 @@ export function EditOccurrencePage() {
             estimatedQuantity: occurrence.estimatedQuantity ?? '',
             description: occurrence.description ?? '',
             location: { latitude: occurrence.latitude, longitude: occurrence.longitude },
+            // A URL da foto termina com o id dela (/api/photos/<id>)
+            photo: occurrence.photoUrl
+              ? { id: occurrence.photoUrl.split('/').pop()!, url: occurrence.photoUrl }
+              : null,
           }}
           submitLabel="Salvar alterações"
           submittingLabel="Salvando…"

@@ -2,8 +2,9 @@ import { useId, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useCategories } from '../../hooks/useCategories'
 import { ApiError } from '../../lib/api'
-import type { LatLng, OccurrenceInput } from '../../lib/types'
+import type { LatLng, OccurrenceInput, UploadedPhoto } from '../../lib/types'
 import { LocationPicker } from '../map/LocationPicker'
+import { PhotoField } from '../PhotoField'
 import { TextField } from '../TextField'
 
 export type OccurrenceFormValues = {
@@ -12,6 +13,7 @@ export type OccurrenceFormValues = {
   estimatedQuantity: string
   description: string
   location: LatLng | null
+  photo: UploadedPhoto | null
 }
 
 type OccurrenceFormProps = {
@@ -27,6 +29,7 @@ const emptyValues: OccurrenceFormValues = {
   estimatedQuantity: '',
   description: '',
   location: null,
+  photo: null,
 }
 
 const selectClasses =
@@ -44,6 +47,7 @@ export function OccurrenceForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [photoUploading, setPhotoUploading] = useState(false)
 
   const subcategories = categories.find((c) => c.id === values.categoryId)?.subcategories ?? []
 
@@ -75,6 +79,7 @@ export function OccurrenceForm({
         subcategoryId: values.subcategoryId,
         estimatedQuantity: values.estimatedQuantity,
         description: values.description,
+        photoId: values.photo?.id ?? null,
         ...values.location,
       })
     } catch (err) {
@@ -196,6 +201,14 @@ export function OccurrenceForm({
         )}
       </div>
 
+      <PhotoField
+        label="Foto do material"
+        value={values.photo}
+        onChange={(photo) => update({ photo })}
+        onBusyChange={setPhotoUploading}
+      />
+      {fieldErrors['photoId'] && <p className="text-sm text-red-700">{fieldErrors['photoId']}</p>}
+
       {error && (
         <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
@@ -204,7 +217,8 @@ export function OccurrenceForm({
 
       <button
         type="submit"
-        disabled={submitting}
+        // Espera a foto terminar de subir antes de publicar
+        disabled={submitting || photoUploading}
         className="rounded-xl bg-brand-700 px-6 py-3 font-semibold text-white uppercase hover:bg-brand-900 disabled:opacity-60"
       >
         {submitting ? submittingLabel : submitLabel}

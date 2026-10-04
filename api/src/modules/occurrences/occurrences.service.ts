@@ -2,6 +2,7 @@ import type { Prisma } from '../../generated/prisma/client.js'
 import { avatarSelect, withAvatarUrl } from '../../lib/avatars.js'
 import { AppError } from '../../lib/errors.js'
 import { prisma } from '../../lib/prisma.js'
+import { assertUsablePhoto, photoUrl } from '../photos/photos.service.js'
 import { statusesThatCanReach } from './occurrence-status.js'
 import type {
   CreateOccurrenceInput,
@@ -19,7 +20,7 @@ export const occurrenceBaseSelect = {
   estimatedQuantity: true,
   latitude: true,
   longitude: true,
-  photoUrl: true,
+  photoId: true,
   status: true,
   createdAt: true,
   updatedAt: true,
@@ -41,6 +42,7 @@ export const occurrenceSelect = {
       cancelledAt: true,
       collectedQuantity: true,
       observation: true,
+      photoId: true,
       collector: { select: personSelect },
     },
   },
@@ -48,17 +50,22 @@ export const occurrenceSelect = {
 
 type SelectedOccurrence = Prisma.OccurrenceGetPayload<{ select: typeof occurrenceSelect }>
 
+type BaseOccurrence = Prisma.OccurrenceGetPayload<{ select: typeof occurrenceBaseSelect }>
+
+// Campos internos viram URLs: `photoId` → `photoUrl`, avatar da pessoa → `avatarUrl`
+export function toBaseOccurrenceResponse({ photoId, ...occurrence }: BaseOccurrence) {
+  return { ...occurrence, photoUrl: photoUrl(photoId), user: withAvatarUrl(occurrence.user) }
+}
+
 // Formato devolvido pela API: a coleta mais recente vira `collection` (ou null)
 export function toOccurrenceResponse({ collections, ...occurrence }: SelectedOccurrence) {
-  const collection = collections[0]
-  return {
-    ...occurrence,
-    // Pessoas aparecem com `avatarUrl` no lugar dos campos internos de avatar
-    user: withAvatarUrl(occurrence.user),
-    collection: collection
-      ? { ...collection, collector: withAvatarUrl(collection.collector) }
-      : null,
+  const latest = collections[0]
+  let collection = null
+  if (latest) {
+    const { photoId, ...rest } = latest
+    collection = { ...rest, photoUrl: photoUrl(photoId), collector: withAvatarUrl(rest.collector) }
   }
+  return { ...toBaseOccurrenceResponse(occurrence), collection }
 }
 
 const MAX_LIST_RESULTS = 500
@@ -95,6 +102,7 @@ async function explainRejectedChange(
 
 export async function createOccurrence(userId: string, input: CreateOccurrenceInput) {
   await assertValidCategory(input.categoryId, input.subcategoryId)
+  if (input.photoId) await assertUsablePhoto(input.photoId, userId)
 
   // RN01 (usuário autenticado) e RN03 (status inicial AVAILABLE, padrão do banco)
   const occurrence = await prisma.occurrence.create({
@@ -147,6 +155,8 @@ export async function updateOccurrence(id: string, userId: string, input: Update
     input = { ...input, subcategoryId }
     await assertValidCategory(input.categoryId ?? current.categoryId, subcategoryId)
   }
+  // Trocar a foto: só por uma enviada pela própria pessoa (null remove a foto)
+  if (input.photoId) await assertUsablePhoto(input.photoId, userId, { occurrenceId: id })
 
   // Condicional de novo: o status pode ter mudado (ex.: alguém assumiu) desde a leitura acima
   const { count } = await prisma.occurrence.updateMany({

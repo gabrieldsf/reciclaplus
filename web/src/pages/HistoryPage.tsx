@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
+import { OccurrenceThumb } from '../components/occurrences/OccurrenceThumb'
 import { StatusBadge } from '../components/occurrences/StatusBadge'
 import { api } from '../lib/api'
-import { categoryStyle } from '../lib/categories'
 import { formatDateTime } from '../lib/format'
 import type { MyCollection, Occurrence } from '../lib/types'
 
@@ -89,7 +89,12 @@ function OccurrenceList({ occurrences }: { occurrences: Occurrence[] }) {
   return (
     <ul className="flex flex-col gap-3">
       {occurrences.map((o) => (
-        <HistoryCard key={o.id} occurrence={o} badge={<StatusBadge status={o.status} />}>
+        <HistoryCard
+          key={o.id}
+          occurrence={o}
+          collectionPhotoUrl={o.collection?.photoUrl ?? null}
+          badge={<StatusBadge status={o.status} />}
+        >
           <p>Registrada em {formatDateTime(o.createdAt)}</p>
           {o.collection && (
             <p>
@@ -130,6 +135,7 @@ function CollectionList({ collections }: { collections: MyCollection[] }) {
           <HistoryCard
             key={c.id}
             occurrence={c.occurrence}
+            collectionPhotoUrl={c.photoUrl}
             badge={
               <span
                 className={`inline-block shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ${classes}`}
@@ -155,27 +161,23 @@ function CollectionList({ collections }: { collections: MyCollection[] }) {
 
 function HistoryCard({
   occurrence,
+  collectionPhotoUrl,
   badge,
   children,
 }: {
   occurrence: Omit<Occurrence, 'collection'>
+  // Foto enviada ao finalizar a coleta (comprovante)
+  collectionPhotoUrl: string | null
   badge: ReactNode
   children: ReactNode
 }) {
-  const { emoji, color } = categoryStyle(occurrence.category.name)
   return (
     <li>
       <Link
         to={`/ocorrencias/${occurrence.id}`}
         className="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm hover:ring-2 hover:ring-brand-500/30"
       >
-        <span
-          aria-hidden="true"
-          className="grid size-10 shrink-0 place-items-center rounded-full"
-          style={{ backgroundColor: color }}
-        >
-          {emoji}
-        </span>
+        <OccurrenceThumb categoryName={occurrence.category.name} photoUrl={occurrence.photoUrl} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <p className="font-semibold">
@@ -190,6 +192,17 @@ function HistoryCard({
             <p className="text-sm">Quantidade estimada: {occurrence.estimatedQuantity}</p>
           )}
           <div className="mt-1 text-xs text-brand-700">{children}</div>
+          {collectionPhotoUrl && (
+            <span className="mt-2 flex items-center gap-2 text-xs font-medium text-blue-900">
+              <img
+                src={collectionPhotoUrl}
+                alt="Foto da coleta"
+                loading="lazy"
+                className="size-10 rounded-md object-cover ring-1 ring-blue-200"
+              />
+              📸 Foto da coleta
+            </span>
+          )}
         </div>
         <span aria-hidden="true" className="self-center text-brand-700">
           ›

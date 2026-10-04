@@ -66,6 +66,8 @@ o descartam ao final. Eles nunca acessam o banco da Neon.
 | PUT    | `/api/me/avatar/photo`                 | JWT  | Envia foto (JPEG/PNG/WebP, até 300 KB)                       |
 | DELETE | `/api/me/avatar`                       | JWT  | Remove foto/avatar                                           |
 | GET    | `/api/users/:id/avatar`                | —    | Foto de perfil (cache por versão)                            |
+| POST   | `/api/photos`                          | JWT  | Envia foto (ocorrência/coleta; até 600 KB) → `{ id, url }`   |
+| GET    | `/api/photos/:id`                      | —    | Foto (cache longo)                                           |
 
 Rotas protegidas exigem o cabeçalho `Authorization: Bearer <token>`. Criar ocorrência, assumir e
 finalizar coleta exigem também o e-mail confirmado (senão: 403 `EMAIL_NOT_VERIFIED`).

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
+import { OccurrenceThumb } from '../components/occurrences/OccurrenceThumb'
 import { UserAvatar } from '../components/UserAvatar'
 import { VerifyEmailLink } from '../components/VerifyEmailLink'
 import { useCurrentPosition } from '../hooks/useCurrentPosition'
 import { api, ApiError } from '../lib/api'
-import { categoryStyle } from '../lib/categories'
 import { formatDateTime } from '../lib/format'
 import { formatDistance, getLastLocation, sortByDistance } from '../lib/geo'
 import type { Occurrence } from '../lib/types'
@@ -113,7 +113,6 @@ export function CollectPage() {
           </p>
           <ul className="flex flex-col gap-3">
             {sorted.map(({ item: occurrence, distance }) => {
-              const { emoji, color } = categoryStyle(occurrence.category.name)
               const isOwner = user?.id === occurrence.user.id
               return (
                 <li
@@ -122,13 +121,10 @@ export function CollectPage() {
                   className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm"
                 >
                   <div className="flex items-start gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="grid size-10 shrink-0 place-items-center rounded-full"
-                      style={{ backgroundColor: color }}
-                    >
-                      {emoji}
-                    </span>
+                    <OccurrenceThumb
+                      categoryName={occurrence.category.name}
+                      photoUrl={occurrence.photoUrl}
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-semibold">
